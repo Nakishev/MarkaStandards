@@ -1,43 +1,49 @@
-![alt text](Assets/logo.png)
+![Marka Logo](Assets/logo.png)
+
+**Table of Contents**
 
 - [Introduction](#introduction)
 - [Process Standards and Recommendations](#process-standards-and-recommendations)
   - [Human Resources (HR)](#human-resources-hr)
     - [Tools](#tools)
     - [Onboarding](#onboarding)
-    - [Qualification Monitoring and Trainings](#qualification-monitoring-and-trainings)
+    - [Qualification Monitoring and Training](#qualification-monitoring-and-training)
   - [Project Management and Collaboration](#project-management-and-collaboration)
     - [Communication and Process Workflows](#communication-and-process-workflows)
     - [Project Management Tools and Resources](#project-management-tools-and-resources)
-    - [Default Project Type and Team Activities](#default-project-type-and-team-activities)
+    - [Default Project Model and Team Activities](#default-project-model-and-team-activities)
   - [Development](#development)
-    - [Version control and branching](#version-control-and-branching)
-    - [Commit messages format](#commit-messages-format)
-    - [Code Style and Format](#code-style-and-format)
-      - [WebApi Development Conventions](#webapi-development-conventions)
+    - [Version Control and Branching](#version-control-and-branching)
+    - [Commit Message Standards](#commit-message-standards)
+    - [Code Style and Formatting](#code-style-and-formatting)
+      - [Web API Development Conventions](#web-api-development-conventions)
         - [REST Compliance](#rest-compliance)
-        - [Resources](#resources)
-      - [Configuring IDE/Editors](#configuring-ideeditors)
-      - [Using Linters and Code Formatters](#using-linters-and-code-formatters)
-      - [Controlling commit messages format](#controlling-commit-messages-format)
+        - [Resource Structures](#resource-structures)
+      - [IDE/Editor Configuration](#ideeditor-configuration)
+      - [Linters and Formatters](#linters-and-formatters)
+      - [Commit Message Validation](#commit-message-validation)
   - [Documentation](#documentation)
-    - [WebApi, Serverless and Data Contracts](#webapi-serverless-and-data-contracts)
+    - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
     - [Docker](#docker)
       - [General Recommendations](#general-recommendations)
       - [Optimizations](#optimizations)
-    - [Release changelogs](#release-changelogs)
+    - [Release Changelogs](#release-changelogs)
   - [Testing](#testing)
   - [Deployment](#deployment)
     - [Cloud Providers](#cloud-providers)
   - [Security](#security)
     - [Backup Policy](#backup-policy)
     - [External Access](#external-access)
-    - [Vulnerabilities and Package/Library Management](#vulnerabilities-and-packagelibrary-management)
+    - [Vulnerability and Dependency Management](#vulnerability-and-dependency-management)
 - [Official Resources](#official-resources)
+
+---
 
 # Introduction
 
-This document outlines the processes, procedures, recommendations and standards that define Marka’s approach to operations, ensuring consistency, quality, and efficiency. It serves as a comprehensive guide for aligning team practices with organizational goals and maintaining excellence across all projects.
+This document presents Marka’s official processes, standards, and best practices. It ensures that all teams operate with consistency, quality, and efficiency, while maintaining alignment with organizational goals. Use this guide as a reference for standard operating procedures, technical conventions, and recommended workflows across all projects and departments within Marka.
+
+---
 
 # Process Standards and Recommendations
 
@@ -45,160 +51,119 @@ This document outlines the processes, procedures, recommendations and standards 
 
 ### Tools
 
-For managing projects and candidates/employees, skill assessments, progress tracking, automating personal development a custom solution Staff Management was created. It has to be used by the Marka management and employees to simplify, automate and improve the efficiency in the HR-related domains
+Marka employs a custom “Staff Management” solution for handling HR-related processes, including candidate management, employee skill assessments, and professional development tracking. This system streamlines HR operations, improving efficiency and automation.
 
-![alt text](Assets/StaffManagement_persons.png)
+![Staff Management Screenshot](Assets/StaffManagement_persons.png)
 
-The system is available by the url https://wa-staffmanagement-linux-prod.azurewebsites.net. In order to use it, obtain credential from the Marka's CTO.
+**Access:** [Staff Management System](https://wa-staffmanagement-linux-prod.azurewebsites.net)  
+Obtain credentials from Marka’s CTO.
 
 ### Onboarding
 
-When onboarding a new employee, the following action to be taken:
+When onboarding a new employee, the following steps must be taken:
 
-- create an AD (EntraId) account in the marka-software.company domain
-- create an account in Staff Management System
-- create an account (along with project and customer if needed) in time tracking system (Kimai)
-- conduct an introduction call and hand-over all the accesses and credentials to the employee
+- Create an Entra ID (Azure AD) account in the `marka-software.company` domain.
+- Set up a Staff Management System account.
+- Create a Kimai time-tracking account (with project and customer configuration if required).
+- Conduct an introductory call and provide all necessary credentials and accesses.
 
-After these steps, all the information needed to begin a working process, is available for the user in the tab info of his personal card in Staff Management.
-Which is:
+Post-onboarding, essential information (contacts, benefits, process standards, tools, licenses) is available under the user’s personal tab in the Staff Management System.
 
-- important contact for every type of need or questions
-- eligible benefits
-- links to Marka Process Standards and Recommendations
-- professional software and tools to be used, along with the licenses
+### Qualification Monitoring and Training
 
-### Qualification Monitoring and Trainings
+Staff Management System automatically tracks required and current qualifications for each employee. Regular personal development plans (PDPs) and feedback sessions ensure continuous professional growth and market relevance. Interns and junior staff must undergo automatic skill checks every two weeks; schedules for other roles are determined individually.
 
-Required and actual qualification of every employee is tracked automatically in Staff Management System.
-In order to achieve a possibility of permanent professional grow of Marka's staff, to match the market demands and requirements, personal development plans (PDP) have to be created for every individual as well as regular call scheduled to track the progress and receive feedbacks and personal preferences.
-For interns and juniors it's mandatory to pass automatic skill checks every 2 weeks, the schedules for others are agreed individually.
+---
 
 ## Project Management and Collaboration
 
 ### Communication and Process Workflows
 
-In the internal projects and projects, where our processes are used and Marka is responsible for infrastructure and technology, for
-all communication, a corporate self-hosted solution Mattermost must be used
+For internal and managed projects, all corporate communication should occur via Marka’s self-hosted Mattermost solution.
 
-![alt text](Assets/Mattermost_messaging.png)
+![Mattermost Screenshot](Assets/Mattermost_messaging.png)
 
-For important project workflows or processes, an automated playbook must be configured and used.
-An example for resolving an incident
+For critical project workflows, configure and use automated playbooks within Mattermost, such as those for incident resolution:
 
-![alt text](Assets/Mattermost_processes.png)
+![Mattermost Processes Screenshot](Assets/Mattermost_processes.png)
 
 ### Project Management Tools and Resources
 
-For project management, the default tool is Azure DevOps projects. As far is Jira is an industry standard, it's acceptable to use Jira and Confluence for some projects and as a part of a training process for interns and juniors.
-Marka's Azure and Atlassian subscriptions must be used exclusively for these purposes.
+Azure DevOps Projects is the default choice for project management. Jira and Confluence may be used as secondary or training platforms. Marka’s Azure and Atlassian subscriptions must be used exclusively for company projects and staff skill development.
 
-### Default Project Type and Team Activities
+### Default Project Model and Team Activities
 
-The default project type is Scrum with 2-weeks sprints.
+The standard project methodology is Scrum with two-week sprints.  
+Daily stand-ups (at least twice a week), sprint planning, and sprint reviews are recommended. Sprint reviews can be conducted on demand.
 
-![alt text](Assets/AzureDevOps_Projects.png)
+![Azure DevOps Projects Screenshot](Assets/AzureDevOps_Projects.png)
 
-The mandatory activities are daily meetings (at least 2 times a week), sprint reviews and planning.
-Sprint reviews are optionally, and conducted by demand.
+---
 
 ## Development
 
-### Version control and branching
+### Version Control and Branching
 
-Git must be used as the version control system in all projects, and Azure DevOps Repos or GitHub for collaboration.
-For large projects the standard Git flow is the way to go.
-For smaller ones, a simplified flow based on Git flow can be used with branches:
+Use Git for all projects, with Azure DevOps Repos or GitHub for repository hosting.  
+For large projects, adopt the Git Flow model. For smaller projects, a simplified branching strategy may be used:
 
-- main (the final branch with tested and fully working code, that can be deployed to production any time)
-- dev (the branch, where all the development conducts)
-- feature branch (optional) (for features and breaking changes)
-- bugfix (optional)
+- **main:** fully tested, production-ready code
+- **dev:** active development branch
+- **feature:** optional feature branches for major changes
+- **bugfix:** optional bugfix branches
 
-Releases in main branch are marked with special tags representing version number
-For small and training projects only 2 branches are used - main and dev. All the fixes and work to be done in the dev branch.
+Tag releases in `main` with version numbers. For small/training projects, `main` and `dev` branches may suffice.
 
-### Commit messages format
+### Commit Message Standards
 
-Every commit message should contain the following information:
+Commit messages should be clear and descriptive, including:
 
-- change type (like, feat, bug, refactoring etc)
-- caption or change summary
-- task number
-- a list of the changes (optional)
-- the reason for the changes (optional)
+- Change type (feat, fix, refactor, etc.)
+- Brief summary
+- Task/issue number
+- Optional detailed lists of changes and rationale
 
-An example of hight quality commit messages
+**Example:**
 
 ```
-feat: Enhance portfolio period history aggregation with optional filtering #1287
+feat: Enhance portfolio period aggregation #1287
 
-- Updated IPortfolioService and PortfolioService to allow aggregation of portfolio period histories with an optional parameter for filtering by the current period.
-- Modified PortfolioController to accept a query parameter for currentPeriodOnly in the aggregate portfolio period histories endpoint.
-- Added logic in UpdateCurrentPrices to recalculate market values and aggregate portfolio period histories after updating prices.
-
-These changes improve the flexibility and usability of the portfolio period history aggregation functionality.
-
+Extended IPortfolioService and PortfolioService for optional filtering of portfolio period histories.
+Modified PortfolioController to accept a currentPeriodOnly query parameter.
+Improved UpdateCurrentPrices logic for recalculation after price updates.
+These enhancements increase flexibility and usability of the portfolio period aggregation feature.
 ```
 
-### Code Style and Format
+### Code Style and Formatting
 
-It's important to produce high-quality, consistent (across the whole team) and maintainable code.
-To achieve it, is to develop corporate rules for code writing/formatting, based on the best industry standards and practice and strictly follow these rules for every piece of code in every project.
-The only way to get this working, is to automate the rules and agreements and make it an integral part of the entire development process.
+Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated tooling integrated into CI/CD pipelines.
 
-#### WebApi Development Conventions
+#### Web API Development Conventions
 
 ##### REST Compliance
 
-There are 3 levels of REST api maturity, according to Richardson Maturity Model (https://martinfowler.com/articles/richardsonMaturityModel.html):
+Adhere to REST principles (Level 0–2 of Richardson Maturity Model). Level 3 (Hypermedia) is optional.
 
-- Level 0 - Transport
-- Level 1 - Resources
-- Level 2 - HTTP Verbs
-- Level 3 - Hypermedia Controls
+##### REST Methods
 
-The design of every developed REST api must be level 0 - 2 compliant. Level 3 is optional.
+Below is a list of methods that Marka REST services SHOULD support. Not all resources will support all methods, but all resources using the methods below MUST conform to their usage.
 
-##### Resources
+| Method | Description                                                         | Is Idempotent |
+| ------ | ------------------------------------------------------------------- | ------------- |
+| GET    | Return the current value of an object                               | True          |
+| PUT    | Replace an object, or create a named object, when applicable        | True          |
+| DELETE | Delete an object                                                    | True          |
+| POST   | Create a new object based on the data provided, or submit a command | False         |
+| PATCH  | Apply a partial update to an object                                 | False         |
 
-**Singleton and Collection Resources**
-A resource can be a singleton or a collection.
+##### Resource Structures
 
-For example, “customers” is a collection resource and “customer” is a singleton resource.
+Use nouns, logical URI patterns, and query parameters for filtering/sorting. Avoid verbs in URIs and rely on HTTP methods to represent actions.
 
-We can identify “customers” collection resource using the URI “/customers“. We can identify a single “customer” resource using the URI “/customers/{customerId}“.
-
-```
-/customers			//is a collection resource
-/customers/{id}		// is a singleton resource
-```
-
-**Collection and Sub-collection Resources**
-A resource may contain sub-collection resources also.
-For example, sub-collection resource “accounts” of a particular “customer” can be identified using the URN “/customers/{customerId}/accounts” (in a banking domain).
-Similarly, a singleton resource “account” inside the sub-collection resource “accounts” can be identified as follows: “/customers/{customerId}/accounts/{accountId}“.
+**Examples:**
 
 ```
-/customers						//is a collection resource
-/customers/{id}/accounts		// is a sub-collection resource
-```
-
-**Resource representation**
-RESTful URI should refer to a resource that is a thing (noun) instead of referring to an action (verb) because nouns have properties that verbs do not have – similarly, resources have attributes.
-Some examples of a resource are:
-
-- Users of the system
-- User Accounts
-- Network Devices etc.
-
-and their resource URIs can be designed as below:
-
-```
-/api/managed-devices
-/api/managed-devices/{device-id}
-/api/users
-/api/users/{id}
+GET /device-management/managed-devices // Retrieve all devices POST /device-management/managed-devices // Create a new device GET /device-management/managed-devices/{id} // Retrieve a single device
 ```
 
 **Use hyphens (-) to improve the readability of URIs**
@@ -218,147 +183,89 @@ HTTP://API.EXAMPLE.ORGapi/my-folders/my-doc
 http://api.example.org/api/My-Folders/my-doc
 ```
 
-**Never use CRUD function names in URIs**
+Use semantic versioning for APIs and increment versions upon breaking changes.
 
-We should not use URIs to indicate a CRUD function. URIs should only be used to identify the resources and not any action upon them uniquely.
-We should use HTTP request methods to indicate which CRUD function is performed.
+#### IDE/Editor Configuration
 
-```
-HTTP GET /device-management/managed-devices  			//Get all devices
-HTTP POST /device-management/managed-devices  			//Create new Device
-HTTP GET /device-management/managed-devices/{id}  		//Get device for given Id
-HTTP PUT /device-management/managed-devices/{id}  		//Update device for given Id
-HTTP DELETE /device-management/managed-devices/{id}  	//Delete device for given Id
-```
+Use `.editorconfig` and other standardized configuration files for consistent formatting and styling.
 
-**Use query component to filter URI collection**
-Often, you will encounter requirements where you will need a collection of resources sorted, filtered, or limited based on some specific resource attribute.
+#### Linters and Formatters
 
-For this requirement, do not create new APIs – instead, enable sorting, filtering, and pagination capabilities in resource collection API and pass the input parameters as query parameters. e.g.
+Employ linters (ESLint, Roslyn) and formatters (CSharpier) to enforce code style rules automatically.
 
-```
-/device-management/managed-devices
-/device-management/managed-devices?region=USA
-/device-management/managed-devices?region=USA&brand=XYZ
-/device-management/managed-devices?region=USA&brand=XYZ&sort=installation-date
-```
+#### Commit Message Validation
 
-**Do not Use Verbs in the URI**
+Use Husky and lint-staged with conventional commit rules to ensure commit messages meet corporate standards.
 
-It is not correct to put the verbs in REST URIs. REST uses nouns to represent resources, and HTTP methods (GET, POST, PUT, DELETE, etc.) are then used to perform actions on those resources, effectively acting as verbs.
-
-```
-/device-management/managed-devices/{id}/scripts/{id}/execute	//DON't DO THIS!
-/device-management/managed-devices/{id}/scripts/{id}/status		//POST request with action=execute
-```
-
-Below is a list of methods that Marka REST services SHOULD support. Not all resources will support all methods, but all resources using the methods below MUST conform to their usage.
-
-| Method | Description                                                         | Is Idempotent |
-| ------ | ------------------------------------------------------------------- | ------------- |
-| GET    | Return the current value of an object                               | True          |
-| PUT    | Replace an object, or create a named object, when applicable        | True          |
-| DELETE | Delete an object                                                    | True          |
-| POST   | Create a new object based on the data provided, or submit a command | False         |
-| PATCH  | Apply a partial update to an object                                 | False         |
-
-**Versioning**
-
-All APIs compliant with the Marka REST API Guidelines MUST support explicit versioning. It's critical that clients can count on services to be stable over time, and it's critical that services can add features and make changes.
-
-Services are versioned using a Major.Minor versioning scheme. Services MAY opt for a "Major" only version scheme in which case the ".0" is implied and all other rules in this section apply.
-
-Services MUST increment their version number in response to any breaking API change. See the following section for a detailed discussion of what constitutes a breaking change. Services MAY increment their version number for nonbreaking changes as well, if desired.
-
-The following approach to specifying the version of a REST API should be used and supported:
-
-Embedded in the path of the request URL, at the end of the service root:
-
-```
-https://api.example.com/v1.0/products/
-```
-
-#### Configuring IDE/Editors
-
-.editorconfig
-
-#### Using Linters and Code Formatters
-
-Roslyn and ESLint/Genome
-CSharpier
-
-#### Controlling commit messages format
-
-Husky, lint-staged, conventional commits
+---
 
 ## Documentation
 
-All the standard documentation should be generated automatically.
-The standard documentation for a typical modern microservice application is:
+All standard documentation (API specs, serverless definitions, data contracts, release notes) should be automatically generated and consistently maintained.
 
-- api documentation
-- serverless function documentation
-- data contracts and DTO specifications
-- release changelogs
+### Web API, Serverless, and Data Contracts
 
-### WebApi, Serverless and Data Contracts
+Use SwaggerUI or Scalar for API documentation. Scalar is preferred for enhanced capabilities.
 
-For this type of documentation, SwaggerUI or Scalar (the preferable option) have to be configured in projects.
-Swagger:
-![alt text](Assets/Swagger.png)
-
-Scalar:
-![alt text](Assets/Scalar.png)
+![Swagger Screenshot](Assets/Swagger.png)  
+![Scalar Screenshot](Assets/Scalar.png)
 
 ### Docker
 
 #### General Recommendations
 
-- use multi-stage builds
-- prefer alpine base images where possible
-- keep image size as small as possible
-- minimize the number of layers combining commands with '&&'
-- add and use .dockerignore files
+- Use multi-stage builds.
+- Prefer Alpine-based images.
+- Minimize image size and layer count.
+- Use `.dockerignore` to exclude unnecessary files.
 
 #### Optimizations
 
-For analyzing and optimizing images, use tools like:
+Leverage tools like Dive and Slim to optimize image size and layers.
 
 - Dive (https://github.com/wagoodman/dive)
 - Slim (https://github.com/slimtoolkit/slim?tab=readme-ov-file)
 
-### Release changelogs
+### Release Changelogs
 
-Release changelogs should be generated automatically based on git-commits.
-![alt text](Assets/Changelog.png)
+Generate release changelogs automatically from standardized commit messages.
 
-Thats why it's crucial to standardize the format of all commit messages and specify there all the required information like:
+![Changelog Screenshot](Assets/Changelog.png)
 
-- the type of the change
-- meaningful description
-- a reference to the respective task/work item
+---
 
 ## Testing
+
+Adopt a comprehensive, automated testing strategy including unit, integration, and end-to-end tests as appropriate for each project.
+
+---
 
 ## Deployment
 
 ### Cloud Providers
 
-Being a Gold Microsoft Partner along with Azure's powerful capabilities for any purpose and scale, defines Microsoft Azure as the preferable cloud to host resources, setup CI/CD pipelines, deploy solutions.
-Amazon Web Services (AWS) and Google Cloud Platform (GCP), are also available options to obtain crucial professional skills for Marka's developers.
+Azure is the preferred cloud platform due to its capabilities and Marka’s partner status. AWS and GCP may be used for expanding skill sets or meeting specific project requirements.
+
+---
 
 ## Security
 
 ### Backup Policy
 
+Maintain regular backups and test restoration procedures to ensure data integrity and availability.
+
 ### External Access
 
-### Vulnerabilities and Package/Library Management
+Restrict external access to necessary endpoints. Use secure authentication, authorization methods, and encryption where appropriate.
+
+### Vulnerability and Dependency Management
+
+Regularly scan for vulnerabilities in libraries and packages. Promptly address discovered issues to maintain security and stability.
+
+---
 
 # Official Resources
 
-A list of the Marka's resources
-
-- official public site (https://marka-development.com/)
-- corporate Staff Management System (https://wa-staffmanagement-linux-prod.azurewebsites.net)
-- Marka's process standards description (https://github.com/Nakishev/MarkaStandards)
+- [Official Public Site](https://marka-development.com/)
+- [Staff Management System](https://wa-staffmanagement-linux-prod.azurewebsites.net)
+- [Marka’s Process Standards (GitHub)](https://github.com/Nakishev/MarkaStandards)

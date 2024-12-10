@@ -327,7 +327,31 @@ An example of a changelog, generated with a custom script from commit messages:
 
 ## Testing
 
-Adopt a comprehensive, automated testing strategy including unit, integration, and end-to-end tests as appropriate for each project.
+Adopt a comprehensive, automated testing strategy, including unit, integration, and end-to-end tests, as appropriate for each project. Automation enhances reliability, consistency, and speed across the development lifecycle.
+
+### Test Types
+
+| Test Type                  | Description                                                                                       | Recommended Tools                                     | Requirement                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------- |
+| **Unit Tests**             | Validate individual units of code in isolation. TDD is recommended for better code quality.       | XUnit (C#), Jest/Vitest + Testing Library (JS)        | Mandatory for all projects       |
+| **UI Tests**               | Test the graphical user interface of an application.                                              | Playwright                                            | Optional                         |
+| **Integration Tests**      | Ensure that components or services work together as expected.                                     | Testcontainers (C#), Testcontainers + Playwright (JS) | Optional                         |
+| **End-to-End Tests**       | Validate complete workflows from start to finish.                                                 | Playwright                                            | Optional                         |
+| **Performance/Load Tests** | Assess the system's behavior under various conditions, including heavy load and stress scenarios. | gatling, k6, wrk, locust                              | Optional                         |
+| **Acceptance Tests**       | Verify the system meets external stakeholders' requirements and specifications.                   | Playwright, or tool appropriate to project scope      | Optional (for external projects) |
+
+### Additional Notes
+
+- **Unit Tests**: Adopting Test-Driven Development (TDD) ensures higher quality and maintainability, so stick to whenever it's possible.
+- **Performance Testing**: Tools like [Gatling](https://gatling.io/) and k6 provide actionable insights into bottlenecks.
+- **End-to-End Testing**: Utilize Playwright for comprehensive coverage across browsers and devices.
+
+### Resources
+
+- [XUnit Documentation](https://xunit.net/)
+- [Playwright Testing](https://playwright.dev/)
+- [Gatling Load Testing](https://gatling.io/)
+- [Testcontainers for JavaScript](https://github.com/testcontainers/testcontainers-js)
 
 ---
 
@@ -361,7 +385,7 @@ By prioritizing Azure while remaining open to AWS and GCP, the team ensures adap
 
 #### Infrastructure as Code (IaC)
 
-Use Pulumi, Terraform or Azure Resource Manager (ARM) templates to provision and manage infrastructure resources as code.
+Use Pulumi, Terraform or Azure Resource Manager (ARM) templates to provision and manage infrastructure resources as code for long-term projects.
 
 ---
 
@@ -369,11 +393,91 @@ Use Pulumi, Terraform or Azure Resource Manager (ARM) templates to provision and
 
 ### Backup Policy
 
-Maintain regular backups and test restoration procedures to ensure data integrity and availability.
+Implement and enforce a comprehensive backup policy to safeguard data integrity and availability. Regularly scheduled backups, combined with routine restoration testing, ensure that critical resources can be recovered swiftly and reliably in the event of a disaster.
+
+#### Key Principles
+
+- **Regular Backups**: Back up all critical cloud resources such as databases, storage accounts, and repositories. Follow the project-specific backup policy, including frequency and retention periods.
+- **Restoration Testing**: Periodically test the restoration process to verify the integrity and usability of backups. Include restoration drills in the DevOps cycle to simulate disaster recovery scenarios.
+- **Infrastructure as Code (IaC)**: Use IaC tools such as Pulumi, Terraform, or ARM templates for fast and reliable provisioning of infrastructure. Ensure the IaC scripts are version-controlled and up-to-date.
+- **3-2-1 Backup Rule**:
+  - Maintain **3 copies** of your data (1 primary and 2 backups).
+  - Store backups on **2 different types** of media (e.g., cloud and local storage).
+  - Keep **1 copy** off-site for disaster recovery.
+
+#### Backup Locations and Security
+
+- **Cloud Backups**: Use Azure Backup, AWS Backup, or GCP Backup to store data securely and leverage automated backup management tools.
+- **Local and Off-Site Backups**: For hybrid setups, ensure one copy of the backup is stored locally and another in a geographically distributed location.
+- **Secure Storage**: Protect backups with encryption in transit and at rest. Use role-based access control (RBAC) to limit access to backup storage locations.
+
+#### Monitoring and Notifications
+
+- **Backup Monitoring**: Implement monitoring for backup success and failure notifications using tools like Azure Monitor, AWS CloudWatch, or custom logging solutions.
+- **Alerts**: Set up automated alerts for backup failures or irregularities in the backup schedule to ensure immediate action.
+
+#### Policy Guidelines
+
+- **Backup Frequency**: Define a clear schedule for daily, weekly, or monthly backups based on the criticality of the resource.
+- **Retention Period**: Determine retention policies for short-term and long-term backups in alignment with legal and business requirements.
+- **Backup Scope**: Identify the scope of backups, including databases, file storage, application configurations, and containerized workloads.
+
+#### Recommended Tools
+
+- **Azure**: [Azure Backup](https://azure.microsoft.com/en-us/products/backup/), Azure Site Recovery for disaster recovery.
+- **AWS**: [AWS Backup](https://aws.amazon.com/backup/), S3 lifecycle policies.
+- **GCP**: [Google Cloud Backup and DR](https://cloud.google.com/backup-and-dr), Persistent Disk snapshots.
+- **On-Premise**: Tools like Veeam, Bacula, or rsync for local and hybrid backup solutions.
+
+By adhering to these guidelines, projects will achieve robust data protection, ensure high availability, and align with organizational and regulatory requirements for disaster recovery.
 
 ### External Access
 
-Restrict external access to necessary endpoints. Use secure authentication, authorization methods, and encryption where appropriate.
+Ensure secure and controlled external access to Marka's internal resources by following these best practices and guidelines.
+
+#### Access to Internal Resources
+
+- **VPN Access**: Use the provided OpenVPN profiles and certificates to securely access Marka's internal resources. Regularly update profiles and revoke access for inactive users to maintain security.
+- **Endpoint Restrictions**: Limit external access to only the endpoints essential for functionality. Ensure these endpoints are well-documented and monitored.
+
+#### Secure Database Access
+
+- **Private Network Integration**:
+  - Use **Azure Private Link** or **Azure Virtual Network (VNet)** to restrict access to databases containing sensitive information. This ensures that traffic flows securely within the internal network.
+  - Avoid exposing databases directly to the internet.
+- **Firewall Configuration**:
+  - Configure firewalls to restrict database access.
+  - Whitelist only specific external IP addresses of trusted users or systems that require database access.
+  - Regularly review and update firewall rules to remove obsolete or unnecessary entries.
+
+#### Web Application Protection
+
+- **Azure Web Application Firewall (WAF)**:
+  - Deploy Azure WAF to protect web applications from common vulnerabilities such as SQL injection, cross-site scripting (XSS), and DDoS attacks.
+  - Regularly update WAF rules and monitor traffic to identify potential threats.
+- **HTTPS Enforcement**:
+  - Use HTTPS to encrypt all web traffic.
+  - Implement SSL/TLS certificates and renew them automatically using tools like Let's Encrypt or Azure Key Vault.
+
+#### Authentication and Authorization
+
+- **Secure Authentication**:
+  - Enforce strong, multi-factor authentication (MFA) for accessing sensitive resources.
+  - Integrate with identity providers such as Azure Active Directory for centralized user management.
+- **Granular Authorization**:
+  - Follow the principle of least privilege (PoLP) by granting users only the minimum permissions needed for their roles.
+  - Use role-based access control (RBAC) to manage and audit user permissions effectively.
+
+#### Monitoring and Auditing
+
+- **Logging and Alerts**:
+  - Enable logging for VPN connections, database access, and web application traffic.
+  - Set up automated alerts for unauthorized access attempts or anomalies.
+- **Regular Audits**:
+  - Conduct periodic audits of external access points, firewall rules, and access logs.
+  - Document findings and resolve any identified risks promptly.
+
+By implementing these measures, you can ensure robust security for Marka's internal resources while enabling controlled external access where necessary.
 
 ### Vulnerability and Dependency Management
 

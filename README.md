@@ -14,14 +14,15 @@
     - [Default Project Model and Team Activities](#default-project-model-and-team-activities)
   - [Development](#development)
     - [Version Control and Branching](#version-control-and-branching)
-    - [Commit Message Standards](#commit-message-standards)
     - [Code Style and Formatting](#code-style-and-formatting)
-      - [Web API Development Conventions](#web-api-development-conventions)
-        - [REST Compliance](#rest-compliance)
-        - [Resource Structures](#resource-structures)
       - [IDE/Editor Configuration](#ideeditor-configuration)
       - [Linters and Formatters](#linters-and-formatters)
       - [Commit Message Validation](#commit-message-validation)
+      - [Commit Message Standards](#commit-message-standards)
+    - [Web API Development Conventions](#web-api-development-conventions)
+      - [REST Compliance](#rest-compliance)
+      - [REST Methods](#rest-methods)
+      - [Resource Structures](#resource-structures)
   - [Documentation](#documentation)
     - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
     - [Docker](#docker)
@@ -114,7 +115,27 @@ For large projects, adopt the Git Flow model. For smaller projects, a simplified
 
 Tag releases in `main` with version numbers. For small/training projects, `main` and `dev` branches may suffice.
 
-### Commit Message Standards
+### Code Style and Formatting
+
+Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated git hooks or integrated into CI/CD pipelines.
+
+#### IDE/Editor Configuration
+
+Use `.editorconfig` (https://github.com/editorconfig) or other standardized configuration files for consistent formatting and styling.
+Find pre-configured `.editorconfig` files for C#, JavaScript and Python in the repository (https://github.com/Nakishev/MarkaStandards/tree/main/Configs/Editor).
+
+#### Linters and Formatters
+
+Employ linters and formatters to enforce code style rules automatically.
+For C# projects, use `Roslyn` custom rules configured in the `.editorconfig` file and enforce 'treat warnings as errors' option.
+To apply code style rules automatically, use `CSharpier`.
+In JavaScript projects, use `Binome` as both linter and formatter.
+
+#### Commit Message Validation
+
+Use Husky and lint-staged with conventional commit rules to ensure commit messages meet corporate standards.
+
+#### Commit Message Standards
 
 Commit messages should be clear and descriptive, including:
 
@@ -134,17 +155,15 @@ Improved UpdateCurrentPrices logic for recalculation after price updates.
 These enhancements increase flexibility and usability of the portfolio period aggregation feature.
 ```
 
-### Code Style and Formatting
+---
 
-Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated tooling integrated into CI/CD pipelines.
+### Web API Development Conventions
 
-#### Web API Development Conventions
-
-##### REST Compliance
+#### REST Compliance
 
 Adhere to REST principles (Level 0–2 of Richardson Maturity Model). Level 3 (Hypermedia) is optional.
 
-##### REST Methods
+#### REST Methods
 
 Below is a list of methods that Marka REST services SHOULD support. Not all resources will support all methods, but all resources using the methods below MUST conform to their usage.
 
@@ -156,7 +175,7 @@ Below is a list of methods that Marka REST services SHOULD support. Not all reso
 | POST   | Create a new object based on the data provided, or submit a command | False         |
 | PATCH  | Apply a partial update to an object                                 | False         |
 
-##### Resource Structures
+#### Resource Structures
 
 Use nouns, logical URI patterns, and query parameters for filtering/sorting. Avoid verbs in URIs and rely on HTTP methods to represent actions.
 
@@ -170,34 +189,50 @@ GET /device-management/managed-devices // Retrieve all devices POST /device-mana
 To make your URIs easy for people to scan and interpret, use the hyphen (-) character to improve the readability of names in long-path segments.
 
 ```
-http://api.example.com/api/devicemanagement/manageddevices/
-http://api.example.com/api/device-management/managed-devices 	/*This is much better version*/
+http://api.example.com/api/managed-devices 	/*correct*/
+http://api.example.com/api/manageddevices/ /*incorrect*/
 ```
 
 **Use lowercase letters in URIs**
 When convenient, lowercase letters should be consistently preferred in URI paths.
 
 ```
-http://api.example.org/api/my-folders/my-doc       /*This is much better version*/
-HTTP://API.EXAMPLE.ORGapi/my-folders/my-doc
-http://api.example.org/api/My-Folders/my-doc
+http://api.example.org/api/my-folders/my-doc  /*correct*/
+HTTP://API.EXAMPLE.ORG/api/my-folders/my-doc  /*incorrect*/
+http://api.example.org/api/My-Folders/my-doc  /*incorrect*/
 ```
 
+**Use imperative style for endpoint summaries.**
+There are two styles of summaries: imperative (e.g. "Create an item") and declarative (e.g. "Creates an item").
+
+"Create an item" (Preferred)
+
+- Imperative style: Reads like a command or instruction to the client.
+- Commonly used in documentation as it describes the action the endpoint performs.
+- Consistent with how other API specifications (e.g., OpenAPI, REST APIs) are typically written.
+- Matches the usual tense of HTTP verbs (e.g., POST, GET):
+
+```
+POST /api/items – "Create an item"
+GET /api/items – "Get a list of items"
+```
+
+Example in OpenAPI specification:
+
+```
+"paths": {
+  "/items": {
+    "post": {
+      "summary": "Create an item",
+      "description": "Creates a new item in the inventory."
+    }
+  }
+}
+
+```
+
+**Versioning**
 Use semantic versioning for APIs and increment versions upon breaking changes.
-
-#### IDE/Editor Configuration
-
-Use `.editorconfig` and other standardized configuration files for consistent formatting and styling.
-
-#### Linters and Formatters
-
-Employ linters (ESLint, Roslyn) and formatters (CSharpier) to enforce code style rules automatically.
-
-#### Commit Message Validation
-
-Use Husky and lint-staged with conventional commit rules to ensure commit messages meet corporate standards.
-
----
 
 ## Documentation
 
@@ -207,7 +242,10 @@ All standard documentation (API specs, serverless definitions, data contracts, r
 
 Use SwaggerUI or Scalar for API documentation. Scalar is preferred for enhanced capabilities.
 
-![Swagger Screenshot](Assets/Swagger.png)  
+SwaggerUI:
+![Swagger Screenshot](Assets/Swagger.png)
+
+Scalar:
 ![Scalar Screenshot](Assets/Scalar.png)
 
 ### Docker
@@ -228,7 +266,9 @@ Leverage tools like Dive and Slim to optimize image size and layers.
 
 ### Release Changelogs
 
-Generate release changelogs automatically from standardized commit messages.
+Generate release changelogs automatically (using a custom script) from standardized commit messages.
+
+An example of a changelog, generated with a custom script from commit messages:
 
 ![Changelog Screenshot](Assets/Changelog.png)
 

@@ -235,6 +235,8 @@ Example in OpenAPI specification:
 **Versioning**
 Use semantic versioning for APIs and increment versions upon breaking changes.
 
+---
+
 ### Containerization
 
 All developed projects and infrastructure components must be containerized (if it is technically possible) to ensure portability, scalability, and compatibility across various deployment environments (even if the project is not yet supposed to be deployed or used as containerized application). The containerized solutions should meet the following requirements:
@@ -297,6 +299,8 @@ Leverage tools to analyze and optimize Docker images:
 
 By following these guidelines, teams can ensure that Docker images are efficient, secure, and optimized for performance.
 
+---
+
 ## Documentation
 
 All standard documentation (API specs, serverless definitions, data contracts, release notes) should be automatically generated and consistently maintained.
@@ -340,6 +344,24 @@ Adopt a comprehensive, automated testing strategy including unit, integration, a
   - Addressing specific project requirements where Azure may not be the optimal solution.
 
 By prioritizing Azure while remaining open to AWS and GCP, the team ensures adaptability and expertise across multiple cloud platforms.
+
+### DevOps Practices
+
+#### Deployment Types
+
+- **Manual Deployment**  
+  Manual deployment is used for training and short-term projects.
+
+- **Deployment as a docker-compose stack**  
+  Deployment as a docker-compose stack to a Marka-managed Portainer instance is used for archived projects, or projects with low activity. In this case, deployments can be made manually or automatically (using a connected repository webhook or a scheduled task).
+
+- **CI/CD Pipelines**
+  Azure DevOps is used as the primary CI/CD platform, with GitHub Actions as a secondary option.
+  The pipeline should be configured to deploy the project to Azure App Service or Azure Container App (preferred), and trigger on a push to the `main` branch (production) or `dev` branch (staging).
+
+#### Infrastructure as Code (IaC)
+
+Use Pulumi, Terraform or Azure Resource Manager (ARM) templates to provision and manage infrastructure resources as code.
 
 ---
 

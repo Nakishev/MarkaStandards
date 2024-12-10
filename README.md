@@ -303,25 +303,47 @@ By following these guidelines, teams can ensure that Docker images are efficient
 
 ## Documentation
 
-All standard documentation (API specs, serverless definitions, data contracts, release notes) should be automatically generated and consistently maintained.
+Consistently maintain all standard project documentation, including API specifications, serverless definitions, data contracts, release notes, and test reports. Documentation should be automatically generated where possible to ensure accuracy and ease of updates.
 
 ### Web API, Serverless, and Data Contracts
 
-Use SwaggerUI or Scalar for API documentation. Scalar is preferred for enhanced capabilities.
+Document all Web APIs, serverless functions, and data contracts using robust tools. These tools ensure clarity and provide a consistent interface for developers and stakeholders.
 
-SwaggerUI:
+- **Preferred Tool**: **Scalar** for its enhanced documentation capabilities and advanced features.
+- **Alternative Tool**: **SwaggerUI** for basic API documentation needs.
+
+**SwaggerUI Example**:
 ![Swagger Screenshot](Assets/Swagger.png)
 
-Scalar:
+**Scalar Example**:
 ![Scalar Screenshot](Assets/Scalar.png)
 
 ### Release Changelogs
 
-Generate release changelogs automatically (using a custom script) from standardized commit messages.
+Automate the generation of release changelogs using standardized commit messages. This ensures a clear and concise history of changes for each release.
 
-An example of a changelog, generated with a custom script from commit messages:
+- **Best Practice**: Use tools or custom scripts to parse commit messages formatted in a conventional style (e.g., [Conventional Commits](https://www.conventionalcommits.org/)) to generate changelogs automatically.
 
+**Example Changelog**:
+Generated using a custom script based on commit messages.
 ![Changelog Screenshot](Assets/Changelog.png)
+
+### Test Reports
+
+Share with stakeholders and customers comprehensive release test reports, that are automatically generated using tools integrated with your DevOps pipeline or based on test runs/executions according to the project test plans and created issues/bugs.
+These reports provide a detailed view of test results and coverage (if applicable and required) for every release.
+
+#### Recommended Tools:
+
+- **Azure DevOps**: Use built-in test plugins to automatically generate detailed test reports from test executions.
+- **Jira**: Leverage Jira test management plugins to integrate with test runs and create comprehensive reports.
+
+**Azure DevOps Test Reports Example**:
+![Azure DevOps Test Reports Screenshot](Assets/TestReport_AzureDevOps.png)
+
+**Jira Test Reports Examples**:
+![Jira Test Reports Screenshot](Assets/TestReport_Jira.png)
+![Jira Test Reports Screenshot](Assets/TestReport_Jira_2.png)
 
 ---
 

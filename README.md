@@ -23,11 +23,12 @@
       - [REST Compliance](#rest-compliance)
       - [REST Methods](#rest-methods)
       - [Resource Structures](#resource-structures)
+    - [Containerization](#containerization)
+      - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
+      - [General Recommendations](#general-recommendations)
+    - [Optimizations](#optimizations)
   - [Documentation](#documentation)
     - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
-    - [Docker](#docker)
-      - [General Recommendations](#general-recommendations)
-      - [Optimizations](#optimizations)
     - [Release Changelogs](#release-changelogs)
   - [Testing](#testing)
   - [Deployment](#deployment)
@@ -117,7 +118,7 @@ Tag releases in `main` with version numbers. For small/training projects, `main`
 
 ### Code Style and Formatting
 
-Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated git hooks or integrated into CI/CD pipelines.
+Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated git hooks or dedicated tasks in CI/CD pipelines.
 
 #### IDE/Editor Configuration
 
@@ -189,7 +190,7 @@ GET /device-management/managed-devices // Retrieve all devices POST /device-mana
 To make your URIs easy for people to scan and interpret, use the hyphen (-) character to improve the readability of names in long-path segments.
 
 ```
-http://api.example.com/api/managed-devices 	/*correct*/
+http://api.example.com/api/managed-devices /*correct*/
 http://api.example.com/api/manageddevices/ /*incorrect*/
 ```
 
@@ -234,6 +235,68 @@ Example in OpenAPI specification:
 **Versioning**
 Use semantic versioning for APIs and increment versions upon breaking changes.
 
+### Containerization
+
+All developed projects and infrastructure components must be containerized (if it is technically possible) to ensure portability, scalability, and compatibility across various deployment environments (even if the project is not yet supposed to be deployed or used as containerized application). The containerized solutions should meet the following requirements:
+
+- Flexibility in Deployment:
+  - Must be capable of running as a standalone container or as part of a Docker Compose stack.
+  - Ready for deployment to any cloud provider as a containerized application.
+  - Fully compatible with Kubernetes clusters for seamless orchestration and scaling.
+- Support for Integration Testing:
+  - Must be usable in automated testing frameworks, such as Testcontainers, to enable robust and consistent integration testing.
+- Standardized Tooling:
+  - Docker must be used as the primary tool for containerization to maintain consistency and alignment with industry standards.
+
+Docker must be used as the primary tool for containerization to maintain consistency and alignment with industry standards.
+
+#### Dockerfile and Docker Compose Requirements
+
+1. Dockerfile
+
+- Every project must include a Dockerfile located in the root directory of the project.
+- The Dockerfile should be:
+
+  - Functional: Able to build and run the containerized application without errors.
+  - Efficient: Optimized for performance and image size.
+  - Up-to-date: Regularly maintained to reflect the current state of the project.
+
+2. Docker Compose File
+
+- The solution must include a default docker-compose.yml file located in the root directory of the solution.
+- The docker-compose.yml file should:
+  - Define all the necessary services, networks, and volumes required to run the solution in a containerized environment.
+  - Be actual and functional, ensuring all services can be started and interact correctly.
+  - Support local development and testing scenarios by including configurations for required dependencies (e.g., databases, message brokers).
+
+#### General Recommendations
+
+- **Use Multi-Stage Builds**  
+  Optimize the build process by separating build and runtime stages to reduce the final image size.
+
+- **Prefer Alpine-Based Images**  
+  Utilize lightweight Alpine-based images wherever possible to ensure smaller and more secure containers.
+
+- **Minimize Image Size and Layer Count**
+
+  - Combine related `RUN` instructions to reduce the number of layers (use `&&` operator).
+  - Remove unnecessary files and dependencies to keep the image lean.
+
+- **Use `.dockerignore`**  
+  Exclude unnecessary files (e.g., build artifacts, local configurations) from being copied into the image.
+
+### Optimizations
+
+Leverage tools to analyze and optimize Docker images:
+
+- **[Dive](https://github.com/wagoodman/dive)**  
+  A tool for exploring and analyzing Docker images to improve image efficiency and layer usage.
+
+- **[Slim](https://github.com/slimtoolkit/slim?tab=readme-ov-file)**  
+  A tool for automatically slimming down Docker images by identifying and removing unnecessary parts.
+
+By following these guidelines, teams can ensure that Docker images are efficient, secure, and optimized for performance.
+
 ## Documentation
 
 All standard documentation (API specs, serverless definitions, data contracts, release notes) should be automatically generated and consistently maintained.
@@ -247,22 +310,6 @@ SwaggerUI:
 
 Scalar:
 ![Scalar Screenshot](Assets/Scalar.png)
-
-### Docker
-
-#### General Recommendations
-
-- Use multi-stage builds.
-- Prefer Alpine-based images.
-- Minimize image size and layer count.
-- Use `.dockerignore` to exclude unnecessary files.
-
-#### Optimizations
-
-Leverage tools like Dive and Slim to optimize image size and layers.
-
-- Dive (https://github.com/wagoodman/dive)
-- Slim (https://github.com/slimtoolkit/slim?tab=readme-ov-file)
 
 ### Release Changelogs
 
@@ -284,7 +331,15 @@ Adopt a comprehensive, automated testing strategy including unit, integration, a
 
 ### Cloud Providers
 
-Azure is the preferred cloud platform due to its capabilities and Marka’s partner status. AWS and GCP may be used for expanding skill sets or meeting specific project requirements.
+- **Azure**  
+  Azure is the primary and preferred cloud platform, leveraging its robust capabilities and Marka's Microsoft Partner status for seamless integration and support.
+
+- **AWS and GCP**  
+  These platforms may be utilized for:
+  - Expanding team skill sets in multi-cloud environments.
+  - Addressing specific project requirements where Azure may not be the optimal solution.
+
+By prioritizing Azure while remaining open to AWS and GCP, the team ensures adaptability and expertise across multiple cloud platforms.
 
 ---
 

@@ -23,6 +23,13 @@
       - [REST Compliance](#rest-compliance)
       - [REST Methods](#rest-methods)
       - [Resource Structures](#resource-structures)
+    - [Observability](#observability)
+      - [Logs](#logs)
+        - [Semantic Conventions](#semantic-conventions)
+        - [Exporter Configuration](#exporter-configuration)
+        - [Best Practices](#best-practices)
+      - [Metrics](#metrics)
+      - [Distributed Tracing](#distributed-tracing)
     - [Containerization](#containerization)
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
       - [General Recommendations](#general-recommendations)
@@ -30,12 +37,32 @@
   - [Documentation](#documentation)
     - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
     - [Release Changelogs](#release-changelogs)
+    - [Test Reports](#test-reports)
+      - [Recommended Tools:](#recommended-tools)
   - [Testing](#testing)
+    - [Test Types](#test-types)
+    - [Additional Notes](#additional-notes)
+    - [Resources](#resources)
   - [Deployment](#deployment)
     - [Cloud Providers](#cloud-providers)
+      - [Azure](#azure)
+      - [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
+    - [DevOps Practices](#devops-practices)
+      - [Deployment Types](#deployment-types)
+      - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
   - [Security](#security)
     - [Backup Policy](#backup-policy)
+      - [Key Principles](#key-principles)
+      - [Backup Locations and Security](#backup-locations-and-security)
+      - [Monitoring and Notifications](#monitoring-and-notifications)
+      - [Policy Guidelines](#policy-guidelines)
+      - [Recommended Tools](#recommended-tools-1)
     - [External Access](#external-access)
+      - [Access to Internal Resources](#access-to-internal-resources)
+      - [Secure Database Access](#secure-database-access)
+      - [Web Application Protection](#web-application-protection)
+      - [Authentication and Authorization](#authentication-and-authorization)
+      - [Monitoring and Auditing](#monitoring-and-auditing)
     - [Vulnerability and Dependency Management](#vulnerability-and-dependency-management)
 - [Official Resources](#official-resources)
 
@@ -237,6 +264,131 @@ Use semantic versioning for APIs and increment versions upon breaking changes.
 
 ---
 
+### Observability
+
+#### Logs
+
+Use OpenTelemetry compatible logging tools (OpenTelemetry/Azure AppInsights). Prefer standard OpenTelemetry Protocol (OTLP) exporters exporters for maximum compatibility and standardization.
+
+##### Semantic Conventions
+
+Stick to the OpenTelemetry's Logs Data Model ([Logs Data Model](https://opentelemetry.io/docs/specs/otel/logs/data-model/)) when developing log properties and formats.
+
+Preferred list of log attributes:
+
+- `ServiceName`: Name of the service generating the log
+- `Timestamp`: Time when the event occurred (UTC)
+- `ObservedTimestamp`: Time when the event was observed by the logging system (UTC)
+- `SeverityText`: Text representation of severity level (TRACE, DEBUG, INFO, WARN, ERROR, FATAL)
+- `SeverityNumber`: Numeric representation of severity (1-24 as per OTel spec)
+- `Body`: The primary message content
+- `Resource`: Information about the entity producing the log (service, k8s pod, etc.)
+- `Attributes`: Additional contextual information as key-value pairs
+- `TraceId`: Unique identifier for the trace (for distributed tracing)
+- `SpanId`: Unique identifier for the span within the trace
+- `TraceFlags`: Trace option flags (e.g., sampling decision)
+
+##### Best Practices
+
+1. Structured Logging
+
+   - Always use structured logging format (JSON)
+   - Avoid free-form text in attributes
+   - Use semantic conventions for attribute naming
+
+2. Context Propagation
+
+   - Always propagate trace context
+   - Include correlation IDs
+   - Maintain baggage items where relevant
+
+3. Sampling
+
+   - Implement appropriate sampling strategies
+   - Consider head-based sampling for services
+   - Use tail-based sampling for error cases
+
+4. Performance
+   - Use batching for log exports
+   - Implement appropriate buffer sizes
+   - Handle backpressure properly
+
+#### Metrics
+
+Implement standard OpenTelemetry metrics for consistent monitoring across services.
+
+##### Required Metrics
+
+1. Service Health
+
+   - Uptime
+   - Memory usage
+   - CPU usage
+   - Active connections
+
+2. Business Metrics
+   - Request rates
+   - Error rates
+   - Response times
+   - Business-specific KPIs
+
+##### Metric Types
+
+Use appropriate OpenTelemetry metric instruments:
+
+1. Counter
+
+   - For values that only increase
+   - Example: request_count, error_count
+
+2. Gauge
+
+   - For values that can go up and down
+   - Example: memory_usage, active_connections
+
+3. Histogram
+   - For distributions of values
+   - Example: request_duration, payload_size
+
+#### Distributed Tracing
+
+Implement distributed tracing using OpenTelemetry trace semantics.
+
+##### Trace Requirements
+
+1. Span Naming
+
+   - Use clear, descriptive names
+   - Follow the format: `<operation_name>.<context>`
+   - Example: `payment.process`, `auth.validate`
+
+2. Required Span Attributes
+
+   - `service.name`
+   - `service.version`
+   - `deployment.environment`
+   - HTTP attributes for web requests
+   - Database attributes for queries
+
+3. Error Handling
+   - Always mark failed spans with error status
+   - Include error details in span attributes
+   - Link related logs to spans
+
+##### Sampling Strategy
+
+1. Production Environment
+
+   - Use tail-based sampling
+   - Sample 100% of error spans
+   - Sample 10% of normal traffic
+
+2. Non-Production Environments
+   - Sample 100% of all spans
+   - Enable debug spans when needed
+
+---
+
 ### Containerization
 
 All developed projects and infrastructure components must be containerized (if it is technically possible) to ensure portability, scalability, and compatibility across various deployment environments (even if the project is not yet supposed to be deployed or used as containerized application). The containerized solutions should meet the following requirements:
@@ -390,6 +542,14 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
   - Addressing specific project requirements where Azure may not be the optimal solution.
 
 By prioritizing Azure while remaining open to AWS and GCP, the team ensures adaptability and expertise across multiple cloud platforms.
+
+---
+
+#### Azure
+
+#### Azure Resources Naming Conventions
+
+---
 
 ### DevOps Practices
 

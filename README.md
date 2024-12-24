@@ -143,6 +143,29 @@ For large projects, adopt the Git Flow model. For smaller projects, a simplified
 
 Tag releases in `main` with version numbers. For small/training projects, `main` and `dev` branches may suffice.
 
+Git branches naming convention:
+
+- Use lowercase letters and hyphens to separate words (kebab-case)
+- Include a category prefix like feature/, bugfix/, hotfix/, or docs/
+- Keep names descriptive but concise
+- Incorporate issue or ticket numbers when applicable
+- Avoid using only numbers
+- Use clear, meaningful names that explain the branch's purpose
+
+Examples:
+
+- feature/add-user-authentication
+- bugfix/login-page-error
+- hotfix/security-vulnerability-123
+
+In projects with extreme level of collaboration, it is acceptable to put developer initials in the branch name.
+Typical format in this case: [category]/[initials]-[description]
+
+Examples:
+
+- feature/jd-user-login
+- bugfix/mp-database-connection
+
 ### Code Style and Formatting
 
 Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated git hooks or dedicated tasks in CI/CD pipelines.

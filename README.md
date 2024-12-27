@@ -100,7 +100,56 @@ Post-onboarding, essential information (contacts, benefits, process standards, t
 
 ### Qualification Monitoring and Training
 
-Staff Management System automatically tracks required and current qualifications for each employee. Regular personal development plans (PDPs) and feedback sessions ensure continuous professional growth and market relevance. Interns and junior staff must undergo automatic skill checks every two weeks; schedules for other roles are determined individually.
+The Staff Management System automatically tracks both required and current qualifications for each employee, ensuring alignment with professional standards. Regular Personal Development Plans (PDPs) and feedback sessions facilitate continuous growth and relevance in the market.
+
+#### Monitoring and Skill Assessment
+
+- **Interns and Juniors**: Skill checks to be conducted in Staff Management System every two weeks.
+- **Other Roles**: Assessment schedules are determined individually.
+
+The system calculates a **skill score** for each employee, divided into two categories:
+
+1. **Mandatory Qualifications**: Required for the employee's position.
+2. **Optional Qualifications**: Additional skills that enhance the employee’s role.
+
+Skill scores are derived from the number of skills linked to the employee via completed tasks or automatic skill checks (internal interviews). Current scores are displayed on the employee's personal page in the Staff Management System.
+
+![Qualification Monitoring Screenshot](Assets/StaffManagement_Skillmatching.png)
+
+#### Skill Score Requirements
+
+- **Mandatory Qualifications**: A minimum score of **70%** is required for qualification.
+- **Optional Qualifications**: A minimum score of **50%** is required for qualification.
+
+#### Viewing Skills
+
+To review linked skills:
+
+1. Open the `Skillmatching` tab on the employee's personal page.
+2. Toggle to `Matched` to view skills already obtained and proved.
+
+![Matched Skills Screenshot](Assets/StaffManagement_MatchedSkills.png)
+
+Skills that still need to be acquired appear under the `Mismatched` toggle.
+
+![Mismatched Skills Screenshot](Assets/StaffManagement_MismatchedSkills.png)
+
+#### Conducting Skill Checks and Interviews
+
+To initiate a new skill check or interview:
+
+1. Navigate to `Interview -> New Interview`.
+2. Click **Check My Skills**.
+3. Select a position for skill assessment.
+4. Complete the proposed questions and submit the results.
+
+For targeted skill improvement, employees can add a specific topic under the selected position before starting the interview.
+
+![Custom Interview Topic Screenshot](Assets/StaffManagement_CustomInterviewTopic.png)
+
+#### Viewing Interview Results
+
+Results from completed interviews can be accessed under `Interview -> History` in the Staff Management System.
 
 ---
 

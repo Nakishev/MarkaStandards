@@ -62,6 +62,7 @@
       - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
   - [Security](#security)
     - [Backup Policy](#backup-policy)
+      - [Objects/Entities to Backup](#objectsentities-to-backup)
       - [Key Principles](#key-principles)
       - [Backup Locations and Security](#backup-locations-and-security)
       - [Monitoring and Notifications](#monitoring-and-notifications)
@@ -678,6 +679,17 @@ Use Pulumi, Terraform or Azure Resource Manager (ARM) templates to provision and
 ### Backup Policy
 
 Implement and enforce a comprehensive backup policy to safeguard data integrity and availability. Regularly scheduled backups, combined with routine restoration testing, ensure that critical resources can be recovered swiftly and reliably in the event of a disaster.
+
+#### Objects/Entities to Backup
+
+Ensure the following objects and entities are included in the backup plan:
+
+- **Project Documentation**: All essential project-related documents, plans, and files.
+- **Source Code Repositories**: Regularly backup code repositories to protect against accidental deletions or corruption.
+- **Infrastructure Code and Configuration Files**: Backup infrastructure as code (IaC) and any configuration files not included in source code repositories.
+- **Databases**: Backup databases frequently to avoid data loss and ensure quick recovery.
+- **Storage Accounts**: Include both blob and file storage in the backup process.
+- **Virtual Machines**: Backup VM instances, including operating systems and application configurations.
 
 #### Key Principles
 

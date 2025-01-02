@@ -8,6 +8,11 @@
     - [Tools](#tools)
     - [Onboarding](#onboarding)
     - [Qualification Monitoring and Training](#qualification-monitoring-and-training)
+      - [Monitoring and Skill Assessment](#monitoring-and-skill-assessment)
+      - [Skill Score Requirements](#skill-score-requirements)
+      - [Viewing Skills](#viewing-skills)
+      - [Conducting Skill Checks and Interviews](#conducting-skill-checks-and-interviews)
+      - [Viewing Interview Results](#viewing-interview-results)
   - [Project Management and Collaboration](#project-management-and-collaboration)
     - [Communication and Process Workflows](#communication-and-process-workflows)
     - [Project Management Tools and Resources](#project-management-tools-and-resources)
@@ -24,12 +29,17 @@
       - [REST Methods](#rest-methods)
       - [Resource Structures](#resource-structures)
     - [Observability](#observability)
-      - [Logs](#logs)
-        - [Semantic Conventions](#semantic-conventions)
-        - [Exporter Configuration](#exporter-configuration)
-        - [Best Practices](#best-practices)
-      - [Metrics](#metrics)
-      - [Distributed Tracing](#distributed-tracing)
+      - [Low-scale solutions (demo, training, etc. projects)](#low-scale-solutions-demo-training-etc-projects)
+      - [High-scale solutions for production](#high-scale-solutions-for-production)
+        - [Logs](#logs)
+          - [Semantic Conventions](#semantic-conventions)
+          - [Best Practices to follow](#best-practices-to-follow)
+        - [Metrics](#metrics)
+          - [Required Metrics](#required-metrics)
+          - [Metric Types](#metric-types)
+        - [Distributed Tracing](#distributed-tracing)
+          - [Trace Requirements](#trace-requirements)
+          - [Sampling Strategy](#sampling-strategy)
     - [Containerization](#containerization)
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
       - [General Recommendations](#general-recommendations)
@@ -338,11 +348,31 @@ Use semantic versioning for APIs and increment versions upon breaking changes.
 
 ### Observability
 
-#### Logs
+#### Low-scale solutions (demo, training, etc. projects)
+
+Use Azure AppInsights as the primary monitoring tool for low-scale projects.
+Use standard severity levels (INFO, WARN, ERROR) for logging and alerting.
+Attribute every log message with the prefix within squared brackets containing:
+
+- Solution name
+- Project/Service name
+- Method name
+- "logs" or "alerts"
+
+Example:
+
+```
+[InterviewService.QuestionService.GenerateQuestions.Logs] Stared generating questions for interview
+
+```
+
+#### High-scale solutions for production
+
+##### Logs
 
 Use OpenTelemetry compatible logging tools (OpenTelemetry/Azure AppInsights). Prefer standard OpenTelemetry Protocol (OTLP) exporters exporters for maximum compatibility and standardization.
 
-##### Semantic Conventions
+###### Semantic Conventions
 
 Stick to the OpenTelemetry's Logs Data Model ([Logs Data Model](https://opentelemetry.io/docs/specs/otel/logs/data-model/)) when developing log properties and formats.
 
@@ -360,7 +390,7 @@ Preferred list of log attributes:
 - `SpanId`: Unique identifier for the span within the trace
 - `TraceFlags`: Trace option flags (e.g., sampling decision)
 
-##### Best Practices
+###### Best Practices to follow
 
 1. Structured Logging
 
@@ -385,11 +415,11 @@ Preferred list of log attributes:
    - Implement appropriate buffer sizes
    - Handle backpressure properly
 
-#### Metrics
+##### Metrics
 
 Implement standard OpenTelemetry metrics for consistent monitoring across services.
 
-##### Required Metrics
+###### Required Metrics
 
 1. Service Health
 
@@ -404,7 +434,7 @@ Implement standard OpenTelemetry metrics for consistent monitoring across servic
    - Response times
    - Business-specific KPIs
 
-##### Metric Types
+###### Metric Types
 
 Use appropriate OpenTelemetry metric instruments:
 
@@ -422,11 +452,11 @@ Use appropriate OpenTelemetry metric instruments:
    - For distributions of values
    - Example: request_duration, payload_size
 
-#### Distributed Tracing
+##### Distributed Tracing
 
 Implement distributed tracing using OpenTelemetry trace semantics.
 
-##### Trace Requirements
+###### Trace Requirements
 
 1. Span Naming
 
@@ -447,7 +477,7 @@ Implement distributed tracing using OpenTelemetry trace semantics.
    - Include error details in span attributes
    - Link related logs to spans
 
-##### Sampling Strategy
+###### Sampling Strategy
 
 1. Production Environment
 

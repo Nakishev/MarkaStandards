@@ -17,30 +17,32 @@
     - [Communication and Process Workflows](#communication-and-process-workflows)
     - [Project Management Tools and Resources](#project-management-tools-and-resources)
     - [Default Project Model and Team Activities](#default-project-model-and-team-activities)
-  - [Development](#development)
-    - [Version Control and Branching](#version-control-and-branching)
-    - [Code Style and Formatting](#code-style-and-formatting)
-      - [IDE/Editor Configuration](#ideeditor-configuration)
-      - [Linters and Formatters](#linters-and-formatters)
-      - [Commit Message Validation](#commit-message-validation)
-      - [Commit Message Standards](#commit-message-standards)
-    - [Web API Development Conventions](#web-api-development-conventions)
-      - [REST Compliance](#rest-compliance)
-      - [REST Methods](#rest-methods)
-      - [Resource Structures](#resource-structures)
-    - [Observability](#observability)
-      - [Low-scale solutions (demo, training, etc. projects)](#low-scale-solutions-demo-training-etc-projects)
-      - [High-scale solutions for production](#high-scale-solutions-for-production)
-        - [Logs](#logs)
-          - [Semantic Conventions](#semantic-conventions)
-          - [Best Practices to follow](#best-practices-to-follow)
-        - [Metrics](#metrics)
-          - [Required Metrics](#required-metrics)
-          - [Metric Types](#metric-types)
-        - [Distributed Tracing](#distributed-tracing)
-          - [Trace Requirements](#trace-requirements)
-          - [Sampling Strategy](#sampling-strategy)
-    - [Containerization](#containerization)
+- [Development](#development)
+  - [Version Control and Branching](#version-control-and-branching)
+  - [Technology Stack and Tooling Approval](#technology-stack-and-tooling-approval)
+  - [Code Style and Formatting](#code-style-and-formatting)
+    - [IDE/Editor Configuration](#ideeditor-configuration)
+    - [Linters and Formatters](#linters-and-formatters)
+    - [Commit Message Validation](#commit-message-validation)
+    - [Commit Message Standards](#commit-message-standards)
+  - [Code Review and Pull Requests](#code-review-and-pull-requests)
+  - [Web API Development Conventions](#web-api-development-conventions)
+  - [Observability](#observability)
+    - [Low-scale solutions (demo, training, etc. projects)](#low-scale-solutions-demo-training-etc-projects)
+    - [High-scale solutions for production](#high-scale-solutions-for-production)
+      - [Logs](#logs)
+        - [Semantic Conventions](#semantic-conventions)
+        - [Best Practices to follow](#best-practices-to-follow)
+      - [Metrics](#metrics)
+        - [Required Metrics](#required-metrics)
+        - [Metric Types](#metric-types)
+      - [Distributed Tracing](#distributed-tracing)
+        - [Trace Requirements](#trace-requirements)
+        - [Sampling Strategy](#sampling-strategy)
+  - [Containerization](#containerization)
+    - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
+    - [General Recommendations](#general-recommendations)
+  - [Optimizations](#optimizations)
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
       - [General Recommendations](#general-recommendations)
     - [Optimizations](#optimizations)
@@ -53,12 +55,13 @@
     - [Test Types](#test-types)
     - [Additional Notes](#additional-notes)
     - [Resources](#resources)
-  - [Deployment](#deployment)
+- [Deployment](#deployment)
     - [Cloud Providers](#cloud-providers)
       - [Azure](#azure)
       - [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
     - [DevOps Practices](#devops-practices)
       - [Deployment Types](#deployment-types)
+      - [CI/CD Pipelines](#cicd-pipelines)
       - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
   - [Security](#security)
     - [Backup Policy](#backup-policy)
@@ -226,6 +229,14 @@ Examples:
 - feature/jd-user-login
 - bugfix/mp-database-connection
 
+### Technology Stack and Tooling Approval
+
+- Customer alignment: Project technology stack (languages, frameworks, databases, cloud services) must be agreed with the customer and approved by the Tech Lead/Architect/Team Lead.
+- Internal tools and services: Any new 3rd-party development tool/service to be used within Marka’s infrastructure must be pre-approved by the CTO and an infrastructure engineer/admin, and must comply with company security, licensing, and data-protection policies.
+- Network resources: Opening ports, changing firewall rules, VNet/VPN changes, exposing public endpoints, or provisioning additional networked resources require prior approval by the CTO + infrastructure engineer/admin. Include purpose, ports/protocols, environment/scope, duration, and owner in the request.
+- Documentation: Record approved stacks and tools in the repository (README or ADRs in docs/adr/) and keep them up to date. Prefer using already-approved, standard tools when possible.
+- Safety first: Trial new tools in non-production/sandbox environments; do not store customer data during evaluations; remove unused tooling/services after trials.
+
 ### Code Style and Formatting
 
 Maintain high-quality, consistent, and maintainable code by establishing corporate code standards and enforcing them via automated git hooks or dedicated tasks in CI/CD pipelines.
@@ -265,6 +276,54 @@ Modified PortfolioController to accept a currentPeriodOnly query parameter.
 Improved UpdateCurrentPrices logic for recalculation after price updates.
 These enhancements increase flexibility and usability of the portfolio period aggregation feature.
 ```
+
+---
+
+### Code Review and Pull Requests
+
+Code reviews help us ship fast without breaking quality. Keep it simple, respectful, and pragmatic.
+
+#### Creating a Pull Request
+
+- Base against the correct branch: `dev` for staging, `main` for production releases (see Version Control and Branching).
+- Keep PRs small and focused. As a rule of thumb, prefer ≤ 400 changed lines (excluding generated files). Split big work into incremental PRs.
+- Title uses Conventional Commits style: `feat: short summary (#123)`; include the work item/issue number when applicable.
+- Description includes:
+  - What changed and why (context/problem statement and approach)
+  - How it was implemented (key design decisions)
+  - Testing done (how to reproduce, test cases, environments)
+  - Screenshots/GIFs for UI changes
+  - Backward compatibility, migrations, rollout/rollback plan if relevant
+- Mark as Draft if work is in progress or awaiting dependencies.
+- PR checklist (author verifies before requesting review):
+  - Formatting and linters applied; no new warnings (C#: treat warnings as errors; JS: linter clean)
+  - All tests pass locally; new/updated tests added where it makes sense
+  - Docs updated (API/Contracts/README) if behavior or interfaces changed
+  - Changelog/version updated when user-facing behavior changes
+  - No secrets/credentials in code, config, or diffs; use env/Key Vault instead
+  - Container image builds locally (if applicable)
+
+#### Review Process
+
+- Approvals: at least 1 reviewer for normal changes; 2 for risky/production-impacting changes (migrations, auth, security, perf-sensitive paths).
+- Use CODEOWNERS or repository reviewer rules when available (GitHub/Azure DevOps both supported).
+- Turnaround: aim to start review within 1 business day. Authors should respond within 1 business day as well.
+- Author responsibilities:
+  - Self-review before requesting review; run the full local/CI checks
+  - Address every comment (code change or a reply) and resolve conversations when done
+  - Avoid force-push/rebase after reviews begin unless necessary; communicate if you must
+- Reviewer responsibilities:
+  - Be specific, kind, and solution-oriented; prefer suggested edits for nits
+  - Focus on correctness, design, security/privacy, performance, tests, and consistency with our standards
+  - Approve when ready; use “Request changes” for blocking issues; use comments for non-blocking suggestions
+
+#### Merging
+
+- All required CI checks must be green (build, tests, linters; security/dependency scans when configured).
+- Prefer Squash & Merge to keep history clean. Use the PR title as the commit message (Conventional Commits), and include the PR/issue number.
+- Delete the feature branch after merge.
+- When merging to `main`, tag releases and follow the Versioning guidance.
+- For risky changes (migrations, infra): agree on rollout and rollback, and monitor after deployment.
 
 ---
 
@@ -358,12 +417,11 @@ Attribute every log message with the prefix within squared brackets containing:
 - Solution name
 - Project/Service name
 - Method name
-- "logs" or "alerts"
 
 Example:
 
 ```
-[InterviewService.QuestionService.GenerateQuestions.Logs] Stared generating questions for interview
+[StockMate.TransactionService.CreateTransactions] Found 16 transactions to add. Transaction IDs: 1413, 1414, 1415, 1416, 1417, 1418, 1419, 1420, 1421, 1422, 1423, 1424, 1425, 1426, 1427, 1428
 
 ```
 
@@ -667,6 +725,40 @@ By prioritizing Azure while remaining open to AWS and GCP, the team ensures adap
 - **CI/CD Pipelines**
   Azure DevOps is used as the primary CI/CD platform, with GitHub Actions as a secondary option.
   The pipeline should be configured to deploy the project to Azure App Service or Azure Container App (preferred), and trigger on a push to the `main` branch (production) or `dev` branch (staging).
+
+#### CI/CD Pipelines
+
+- Platform: Use Azure DevOps Pipelines as the primary CI/CD platform. GitHub Actions may be used for secondary/training projects.
+- Applicability: For long-lasting projects, CI/CD is mandatory.
+- Triggers:
+  - CI (validation): run on pull requests to `dev` and `main`, and on pushes to feature branches.
+  - CD (deployment): run on merges to `dev` and `main` with environment approvals/gates.
+- Responsibilities (minimum):
+  - Lint and format code (fail on violations; do not auto-commit fixes in CI).
+  - Build artifacts and/or container images.
+  - Run unit tests; collect and publish test coverage; enforce thresholds where appropriate.
+  - Run security and quality scanners (SAST, dependency/license, secret scanning).
+  - Publish artifacts (build outputs) and push images to ACR when applicable.
+  - Deploy to required environments (dev/stage/prod) using Azure App Service or Azure Container Apps.
+- Secrets and configuration:
+  - Store secrets in Azure DevOps variable groups and/or Azure Key Vault; never commit secrets.
+  - Use service connections for cloud deployments and container registries.
+- Environments and approvals:
+  - Use Azure DevOps Environments (dev, stage, prod) with checks and approvals; require manual approval for prod.
+- Structure and naming:
+  - Prefer YAML pipelines stored in the repo under `.azure-pipelines/`.
+  - Keep pipelines simple; split when it improves clarity and speed.
+  - Suggested naming: `project-ci.yml`, `project-cd.yml`; reusable templates in `.azure-pipelines/templates/`.
+- Separate/auxiliary pipelines:
+  - Test suites: UI, integration, end-to-end, performance/load (on demand, nightly, or on tags/branches). May use ephemeral envs or Testcontainers.
+  - Infrastructure: Terraform/Pulumi plan/apply with manual approvals; trigger on infra branches or release tags.
+  - Maintenance: backups (DB/storage), Azure Repo backups, cleanup, periodic vulnerability scans (scheduled/cron).
+- Quality gates:
+  - Block merges if CI fails; require checks on PRs.
+  - Optionally enforce minimum coverage thresholds for core modules.
+- Performance:
+  - Enable caching for package managers (NuGet/npm/pnpm) and Docker layers.
+  - Run jobs and stages in parallel when possible.
 
 #### Infrastructure as Code (IaC)
 

@@ -17,35 +17,32 @@
     - [Communication and Process Workflows](#communication-and-process-workflows)
     - [Project Management Tools and Resources](#project-management-tools-and-resources)
     - [Default Project Model and Team Activities](#default-project-model-and-team-activities)
-- [Development](#development)
-  - [Version Control and Branching](#version-control-and-branching)
-  - [Technology Stack and Tooling Approval](#technology-stack-and-tooling-approval)
-  - [Code Style and Formatting](#code-style-and-formatting)
-    - [IDE/Editor Configuration](#ideeditor-configuration)
-    - [Linters and Formatters](#linters-and-formatters)
-    - [Commit Message Validation](#commit-message-validation)
-    - [Commit Message Standards](#commit-message-standards)
-  - [Code Review and Pull Requests](#code-review-and-pull-requests)
-  - [Web API Development Conventions](#web-api-development-conventions)
-  - [Observability](#observability)
-    - [Low-scale solutions (demo, training, etc. projects)](#low-scale-solutions-demo-training-etc-projects)
-    - [High-scale solutions for production](#high-scale-solutions-for-production)
-      - [Logs](#logs)
-        - [Semantic Conventions](#semantic-conventions)
-        - [Best Practices to follow](#best-practices-to-follow)
-      - [Metrics](#metrics)
-        - [Required Metrics](#required-metrics)
-        - [Metric Types](#metric-types)
-      - [Distributed Tracing](#distributed-tracing)
-        - [Trace Requirements](#trace-requirements)
-        - [Sampling Strategy](#sampling-strategy)
-  - [Containerization](#containerization)
-    - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
-    - [General Recommendations](#general-recommendations)
-  - [Optimizations](#optimizations)
+  - [Development](#development)
+    - [Version Control and Branching](#version-control-and-branching)
+    - [Technology Stack and Tooling Approval](#technology-stack-and-tooling-approval)
+    - [Code Style and Formatting](#code-style-and-formatting)
+      - [IDE/Editor Configuration](#ideeditor-configuration)
+      - [Linters and Formatters](#linters-and-formatters)
+      - [Commit Message Validation](#commit-message-validation)
+      - [Commit Message Standards](#commit-message-standards)
+    - [Code Review and Pull Requests](#code-review-and-pull-requests)
+    - [Web API Development Conventions](#web-api-development-conventions)
+    - [Observability](#observability)
+      - [Low-scale solutions (demo, training, etc. projects)](#low-scale-solutions-demo-training-etc-projects)
+      - [High-scale solutions for production](#high-scale-solutions-for-production)
+        - [Logs](#logs)
+          - [Semantic Conventions](#semantic-conventions)
+          - [Best Practices to follow](#best-practices-to-follow)
+        - [Metrics](#metrics)
+          - [Required Metrics](#required-metrics)
+          - [Metric Types](#metric-types)
+        - [Distributed Tracing](#distributed-tracing)
+          - [Trace Requirements](#trace-requirements)
+          - [Sampling Strategy](#sampling-strategy)
+    - [Containerization](#containerization)
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
       - [General Recommendations](#general-recommendations)
-    - [Optimizations](#optimizations)
+      - [Image Optimizations](#image-optimizations)
   - [Documentation](#documentation)
     - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
     - [Release Changelogs](#release-changelogs)
@@ -55,7 +52,7 @@
     - [Test Types](#test-types)
     - [Additional Notes](#additional-notes)
     - [Resources](#resources)
-- [Deployment](#deployment)
+  - [Deployment](#deployment)
     - [Cloud Providers](#cloud-providers)
       - [Azure](#azure)
       - [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
@@ -251,7 +248,7 @@ Find pre-configured `.editorconfig` files for C#, JavaScript and Python in the r
 Employ linters and formatters to enforce code style rules automatically.
 For C# projects, use `Roslyn` custom rules configured in the `.editorconfig` file and enforce 'treat warnings as errors' option.
 To apply code style rules automatically, use `CSharpier`.
-In JavaScript projects, use `Binome` as both linter and formatter.
+In JavaScript projects, use `Biome` as both linter and formatter.
 
 #### Commit Message Validation
 
@@ -337,13 +334,13 @@ Adhere to REST principles (Level 0–2 of Richardson Maturity Model). Level 3 (H
 
 Below is a list of methods that Marka REST services SHOULD support. Not all resources will support all methods, but all resources using the methods below MUST conform to their usage.
 
-| Method | Description                                                         | Is Idempotent |
-| ------ | ------------------------------------------------------------------- | ------------- |
-| GET    | Return the current value of an object                               | True          |
-| PUT    | Replace an object, or create a named object, when applicable        | True          |
-| DELETE | Delete an object                                                    | True          |
-| POST   | Create a new object based on the data provided, or submit a command | False         |
-| PATCH  | Apply a partial update to an object                                 | False         |
+| Method | Description | Is Idempotent |
+| ------ | ----------- | ------------- |
+| GET    | Return the current value of an object | True |
+| PUT    | Replace an object, or create a named object, when applicable | True |
+| DELETE | Delete an object | True |
+| POST   | Create a new object based on the data provided, or submit a command | False |
+| PATCH  | Apply a partial update to an object | False |
 
 #### Resource Structures
 
@@ -352,7 +349,9 @@ Use nouns, logical URI patterns, and query parameters for filtering/sorting. Avo
 **Examples:**
 
 ```
-GET /device-management/managed-devices // Retrieve all devices POST /device-management/managed-devices // Create a new device GET /device-management/managed-devices/{id} // Retrieve a single device
+GET  /device-management/managed-devices         // Retrieve all devices
+POST /device-management/managed-devices         // Create a new device
+GET  /device-management/managed-devices/{id}    // Retrieve a single device
 ```
 
 **Use hyphens (-) to improve the readability of URIs**
@@ -429,7 +428,7 @@ Example:
 
 ##### Logs
 
-Use OpenTelemetry compatible logging tools (OpenTelemetry/Azure AppInsights). Prefer standard OpenTelemetry Protocol (OTLP) exporters exporters for maximum compatibility and standardization.
+Use OpenTelemetry compatible logging tools (OpenTelemetry/Azure AppInsights). Prefer standard OpenTelemetry Protocol (OTLP) exporters for maximum compatibility and standardization.
 
 ###### Semantic Conventions
 
@@ -563,7 +562,6 @@ All developed projects and infrastructure components must be containerized (if i
 - Standardized Tooling:
   - Docker must be used as the primary tool for containerization to maintain consistency and alignment with industry standards.
 
-Docker must be used as the primary tool for containerization to maintain consistency and alignment with industry standards.
 
 #### Dockerfile and Docker Compose Requirements
 
@@ -600,7 +598,7 @@ Docker must be used as the primary tool for containerization to maintain consist
 - **Use `.dockerignore`**  
   Exclude unnecessary files (e.g., build artifacts, local configurations) from being copied into the image.
 
-### Optimizations
+#### Image Optimizations
 
 Leverage tools to analyze and optimize Docker images:
 
@@ -666,14 +664,14 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 
 ### Test Types
 
-| Test Type                  | Description                                                                                       | Recommended Tools                                     | Requirement                      |
-| -------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------- |
-| **Unit Tests**             | Validate individual units of code in isolation. TDD is recommended for better code quality.       | XUnit (C#), Jest/Vitest + Testing Library (JS)        | Mandatory for all projects       |
-| **UI Tests**               | Test the graphical user interface of an application.                                              | Playwright                                            | Optional                         |
-| **Integration Tests**      | Ensure that components or services work together as expected.                                     | Testcontainers (C#), Testcontainers + Playwright (JS) | Optional                         |
-| **End-to-End Tests**       | Validate complete workflows from start to finish.                                                 | Playwright                                            | Optional                         |
-| **Performance/Load Tests** | Assess the system's behavior under various conditions, including heavy load and stress scenarios. | gatling, k6, wrk, locust                              | Optional                         |
-| **Acceptance Tests**       | Verify the system meets external stakeholders' requirements and specifications.                   | Playwright, or tool appropriate to project scope      | Optional (for external projects) |
+| Test Type | Description | Recommended Tools | Requirement |
+| --- | --- | --- | --- |
+| Unit Tests | Validate individual units of code in isolation. TDD is recommended for better code quality. | XUnit (C#), Jest/Vitest + Testing Library (JS) | Mandatory for all projects |
+| UI Tests | Test the graphical user interface of an application. | Playwright | Optional |
+| Integration Tests | Ensure that components or services work together as expected. | Testcontainers (C#), Testcontainers + Playwright (JS) | Optional |
+| End-to-End Tests | Validate complete workflows from start to finish. | Playwright | Optional |
+| Performance/Load Tests | Assess the system's behavior under various conditions, including heavy load and stress scenarios. | gatling, k6, wrk, locust | Optional |
+| Acceptance Tests | Verify the system meets external stakeholders' requirements and specifications. | Playwright, or tool appropriate to project scope | Optional (for external projects) |
 
 ### Additional Notes
 
@@ -722,9 +720,6 @@ By prioritizing Azure while remaining open to AWS and GCP, the team ensures adap
 - **Deployment as a docker-compose stack**  
   Deployment as a docker-compose stack to a Marka-managed Portainer instance is used for archived projects, or projects with low activity. In this case, deployments can be made manually or automatically (using a connected repository webhook or a scheduled task).
 
-- **CI/CD Pipelines**
-  Azure DevOps is used as the primary CI/CD platform, with GitHub Actions as a secondary option.
-  The pipeline should be configured to deploy the project to Azure App Service or Azure Container App (preferred), and trigger on a push to the `main` branch (production) or `dev` branch (staging).
 
 #### CI/CD Pipelines
 

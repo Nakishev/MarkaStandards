@@ -246,13 +246,16 @@ Find pre-configured `.editorconfig` files for C#, JavaScript and Python in the r
 #### Linters and Formatters
 
 Employ linters and formatters to enforce code style rules automatically.
-For C# projects, use `Roslyn` custom rules configured in the `.editorconfig` file and enforce 'treat warnings as errors' option.
-To apply code style rules automatically, use `CSharpier`.
-In JavaScript projects, use `Biome` as both linter and formatter.
+
+- C#: Use `CSharpier` as the formatter and linter; keep `Roslyn` rules enabled and enforce 'treat warnings as errors' when ready.
+- JavaScript: Use `Biome` as both linter and formatter.
 
 #### Commit Message Validation
 
-Use Husky and lint-staged with conventional commit rules to ensure commit messages meet corporate standards.
+- All projects must follow Conventional Commits for clarity and automated changelogs.
+- JavaScript projects: Use Husky + lint-staged and `commitlint` to enforce rules locally.
+- C# projects: Use `CSharpier` as the formatter and linter; enforce commit message rules via CI (pipeline checks) or server-side hooks.
+- Alternative to pre-commit hooks: Teams that prefer faster pushes can run style/lint and commit message checks in CI instead of local hooks. In that case, block merges if checks fail.
 
 #### Commit Message Standards
 
@@ -707,6 +710,35 @@ By prioritizing Azure while remaining open to AWS and GCP, the team ensures adap
 #### Azure
 
 #### Azure Resources Naming Conventions
+
+Follow these rules to keep Azure resource names consistent and compliant:
+
+- Prefix with resource-type abbreviation
+  - Examples: `rg` (resource group), `vnet` (virtual network), `snet` (subnet), `kv` (Key Vault), `sa` (storage account), `acr` (Azure Container Registry), `aca` (Azure Container Apps), `app` (App Service), `appins` (Application Insights), `sql` (SQL server/db), `vm` (virtual machine), `nsg` (network security group), `pip` (public IP), `aks` (AKS), `apim` (API Management).
+  - Example: `rg-stockmate`.
+- Postfix with environment when separate environments are used
+  - Use short env codes: `-dev`, `-stg`, `-prod`.
+  - Example: `rg-stockmate-prod`.
+- Lowercase only
+  - Use only lowercase letters and digits.
+- Separators and character limits
+  - Use hyphens to separate abbreviation, solution name, and qualifiers where the resource type allows them.
+  - For resource types that disallow special characters (e.g., storage accounts, some DNS labels, ACR), use a single concatenated word with no separators.
+  - Respect Azure length/character constraints for each resource type.
+- Keep names concise and avoid redundancy
+  - Don’t repeat the resource type in the descriptive part (e.g., avoid `rg-resourcegroup-stockmate`).
+- Tagging for grouping across subscriptions
+  - Use Azure tags to group resources by solution and environment, especially in complex projects hosted across multiple subscriptions.
+  - Recommended tags: `solution`, `environment` (dev/stg/prod), `owner`, `costCenter` (or `project`), `managedBy`.
+
+Examples:
+
+- Resource Group: `rg-stockmate-prod`
+- Virtual Network: `vnet-stockmate-prod`
+- Subnet: `snet-stockmate-app-prod`
+- Key Vault: `kv-stockmate-prod`
+- Storage Account (no separators allowed): `sastockmateprod`
+- Container Registry (no separators allowed): `acrstockmateprod`
 
 ---
 

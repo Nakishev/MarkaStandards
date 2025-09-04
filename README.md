@@ -168,7 +168,7 @@ Results from completed interviews can be accessed under `Interview -> History` i
 
 ### Communication and Process Workflows
 
-For internal and managed projects, all corporate communication should occur via Marka’s self-hosted Mattermost solution.
+For internal and managed projects, all corporate communication should occur via Marka’s self-hosted Mattermost solution. Microsoft Teams may be used instead if the team prefers it and there are no strict requirements to self-host project communications or avoid 3rd-party apps.
 
 ![Mattermost Screenshot](Assets/Mattermost_messaging.png)
 

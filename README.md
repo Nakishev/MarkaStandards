@@ -39,6 +39,7 @@
         - [Distributed Tracing](#distributed-tracing)
           - [Trace Requirements](#trace-requirements)
           - [Sampling Strategy](#sampling-strategy)
+      - [Alerting and Uptime Monitoring](#alerting-and-uptime-monitoring)
     - [Containerization](#containerization)
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
       - [General Recommendations](#general-recommendations)
@@ -59,6 +60,7 @@
     - [DevOps Practices](#devops-practices)
       - [Deployment Types](#deployment-types)
       - [CI/CD Pipelines](#cicd-pipelines)
+      - [Orchestration and Scheduled Tasks](#orchestration-and-scheduled-tasks)
       - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
   - [Security](#security)
     - [Backup Policy](#backup-policy)
@@ -550,6 +552,11 @@ Implement distributed tracing using OpenTelemetry trace semantics.
    - Sample 100% of all spans
    - Enable debug spans when needed
 
+#### Alerting and Uptime Monitoring
+
+- Use Uptime Kuma as a self-hosted, cloud-agnostic tool for synthetic checks (HTTP/TCP/etc.), uptime dashboards, and alerting (e.g., email, Teams/Mattermost, webhook).
+- Prefer Uptime Kuma within Marka’s infrastructure when customer or project requirements favor self-hosted monitoring and alerting.
+
 ---
 
 ### Containerization
@@ -679,6 +686,7 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 ### Additional Notes
 
 - **Unit Tests**: Adopting Test-Driven Development (TDD) ensures higher quality and maintainability, so stick to whenever it's possible.
+- Coverage policy: Teams set project-wide coverage thresholds; a typical baseline is ≥ 80% overall, and ≥ 90% for critical modules. Enforce via CI coverage gates.
 - **Performance Testing**: Tools like [Gatling](https://gatling.io/) and k6 provide actionable insights into bottlenecks.
 - **End-to-End Testing**: Utilize Playwright for comprehensive coverage across browsers and devices.
 
@@ -782,10 +790,16 @@ Examples:
   - Maintenance: backups (DB/storage), Azure Repo backups, cleanup, periodic vulnerability scans (scheduled/cron).
 - Quality gates:
   - Block merges if CI fails; require checks on PRs.
-  - Optionally enforce minimum coverage thresholds for core modules.
+  - Set coverage thresholds per team/project; a typical baseline is ≥ 80% overall, and ≥ 90% for critical modules.
 - Performance:
   - Enable caching for package managers (NuGet/npm/pnpm) and Docker layers.
   - Run jobs and stages in parallel when possible.
+
+#### Orchestration and Scheduled Tasks
+
+- Use Kestra (open-source, cloud-agnostic, self-hosted) to orchestrate scheduled tasks and flows such as maintenance jobs, data pipelines, and backups within Marka’s infrastructure when appropriate.
+- Typical use cases: periodic database or storage backups, batch jobs, multi-step deployments, or cross-system automations.
+- Integrate with CI/CD by triggering Kestra flows from pipelines or vice versa as needed.
 
 #### Infrastructure as Code (IaC)
 
@@ -836,6 +850,7 @@ Ensure the following objects and entities are included in the backup plan:
 - **Backup Frequency**: Define a clear schedule for daily, weekly, or monthly backups based on the criticality of the resource.
 - **Retention Period**: Determine retention policies for short-term and long-term backups in alignment with legal and business requirements.
 - **Backup Scope**: Identify the scope of backups, including databases, file storage, application configurations, and containerized workloads.
+- **Scheduling and Orchestration**: Kestra may be used within Marka’s infrastructure to orchestrate and schedule backups and related maintenance jobs.
 
 #### Recommended Tools
 
@@ -882,6 +897,7 @@ Ensure secure and controlled external access to Marka's internal resources by fo
 - **Granular Authorization**:
   - Follow the principle of least privilege (PoLP) by granting users only the minimum permissions needed for their roles.
   - Use role-based access control (RBAC) to manage and audit user permissions effectively.
+- Self-hosted identity provider: When self-hosting is required and reasonable for the project, use Keycloak as the primary choice for production-grade authentication and authorization.
 
 #### Monitoring and Auditing
 

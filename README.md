@@ -772,7 +772,7 @@ Examples:
   - Lint and format code (fail on violations; do not auto-commit fixes in CI).
   - Build artifacts and/or container images.
   - Run unit tests; collect and publish test coverage; enforce thresholds where appropriate.
-  - Run security and quality scanners (SAST, dependency/license, secret scanning).
+- Run security and quality scanners (SAST, SCA/dependency & license, container, IaC, secret scanning). Recommended: Snyk (Code/Open Source/Container/IaC) with severity gates (fail on high/critical by default).
   - Publish artifacts (build outputs) and push images to ACR when applicable.
   - Deploy to required environments (dev/stage/prod) using Azure App Service or Azure Container Apps.
 - Secrets and configuration:
@@ -794,6 +794,48 @@ Examples:
 - Performance:
   - Enable caching for package managers (NuGet/npm/pnpm) and Docker layers.
   - Run jobs and stages in parallel when possible.
+
+Example (Azure DevOps YAML using Snyk CLI):
+
+```yaml path=null start=null
+# Assumes SNYK_TOKEN is stored securely in a variable group or Key Vault secret
+# and mapped into the pipeline as $(SNYK_TOKEN). Do not echo this value.
+steps:
+  - script: npm install -g snyk
+    displayName: Install Snyk CLI
+
+  # Application dependency (SCA) and SAST scans
+  - script: |
+      snyk test --severity-threshold=high --all-projects
+      snyk code test --severity-threshold=high
+    displayName: Snyk Code + Open Source scans
+    env:
+      SNYK_TOKEN: $(SNYK_TOKEN)
+
+  # Infrastructure-as-Code scan (Terraform, K8s, ARM/Bicep, etc.)
+  - script: snyk iac test infra/
+    displayName: Snyk IaC scan
+    env:
+      SNYK_TOKEN: $(SNYK_TOKEN)
+
+  # Container image scan (if you build/push an image earlier in the pipeline)
+  # Replace $(IMAGE_REF) with the built image reference, e.g. myacr.azurecr.io/app:$(Build.BuildId)
+  - script: snyk container test $(IMAGE_REF) --file=Dockerfile
+    displayName: Snyk Container scan
+    env:
+      SNYK_TOKEN: $(SNYK_TOKEN)
+
+  # Optional: continuously monitor the project in Snyk (dashboard & alerts)
+  - script: snyk monitor --all-projects
+    displayName: Snyk monitor
+    env:
+      SNYK_TOKEN: $(SNYK_TOKEN)
+```
+
+Notes:
+- Prefer the official Snyk Azure DevOps extension for richer PR annotations and results in the UI; use the CLI as a portable fallback.
+- Set severity gates via `--severity-threshold` (e.g., high) to fail builds on critical/high issues by default.
+- Manage temporary ignores in a `.snyk` policy file with required reason and expiry; review regularly.
 
 #### Orchestration and Scheduled Tasks
 
@@ -912,7 +954,18 @@ By implementing these measures, you can ensure robust security for Marka's inter
 
 ### Vulnerability and Dependency Management
 
-Regularly scan for vulnerabilities in libraries and packages. Promptly address discovered issues to maintain security and stability.
+Regularly scan for vulnerabilities across application code, dependencies, containers, and infrastructure-as-code. Promptly address discovered issues to maintain security and stability.
+
+Recommended tool: Snyk
+- Scope: Snyk covers SAST (Code), SCA/dependencies & licenses (Open Source), container images (Container), and IaC (Terraform/K8s/ARM/Bicep).
+- Integration: Use the official Azure DevOps extension for first-class experience (PR checks, annotations). Alternatively, use the Snyk CLI in pipelines.
+- Gating policy: Fail builds on high/critical issues by default; teams may raise/lower thresholds for specific components with justification.
+- PR scanning: Run scanners on pull requests to surface issues early and block merges when thresholds are exceeded.
+- Monitoring: Use `snyk monitor` to continuously track projects in the Snyk dashboard and receive notifications when new vulnerabilities emerge.
+- Ignore policy: Use a `.snyk` policy file for time-bound ignores with a documented reason. Avoid permanent ignores.
+- Secrets: Store `SNYK_TOKEN` in Azure DevOps variable groups or Key Vault; pass via environment variables only. Never commit tokens or echo them in logs.
+- Container and registry: Scan images post-build; optionally connect ACR to Snyk for registry scanning.
+- Scheduling: Add nightly/weekly scheduled scans to catch newly disclosed CVEs.
 
 ---
 

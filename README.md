@@ -299,6 +299,7 @@ Code reviews help us ship fast without breaking quality. Keep it simple, respect
 - Mark as Draft if work is in progress or awaiting dependencies.
 - PR checklist (author verifies before requesting review):
   - Formatting and linters applied; no new warnings (C#: treat warnings as errors; JS: linter clean)
+  - If the PR changes business logic, include unit tests covering the implemented/modified behavior; update existing tests as needed (explain any exceptions in the description)
   - All tests pass locally; new/updated tests added where it makes sense
   - Docs updated (API/Contracts/README) if behavior or interfaces changed
   - Changelog/version updated when user-facing behavior changes

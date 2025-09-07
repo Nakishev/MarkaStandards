@@ -44,8 +44,10 @@
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
       - [General Recommendations](#general-recommendations)
       - [Image Optimizations](#image-optimizations)
+      - [Image Tagging and Retention](#image-tagging-and-retention)
   - [Documentation](#documentation)
     - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
+    - [Architecture and ADRs](#architecture-and-adrs)
     - [Release Changelogs](#release-changelogs)
     - [Test Reports](#test-reports)
       - [Recommended Tools:](#recommended-tools)
@@ -57,6 +59,7 @@
     - [Cloud Providers](#cloud-providers)
       - [Azure](#azure)
       - [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
+      - [Azure Resource Governance](#azure-resource-governance)
     - [DevOps Practices](#devops-practices)
       - [Deployment Types](#deployment-types)
       - [CI/CD Pipelines](#cicd-pipelines)
@@ -77,6 +80,7 @@
       - [Authentication and Authorization](#authentication-and-authorization)
       - [Monitoring and Auditing](#monitoring-and-auditing)
     - [Vulnerability and Dependency Management](#vulnerability-and-dependency-management)
+    - [Secrets Management](#secrets-management)
 - [Official Resources](#official-resources)
 
 ---
@@ -170,7 +174,7 @@ Results from completed interviews can be accessed under `Interview -> History` i
 
 ### Communication and Process Workflows
 
-For internal and managed projects, all corporate communication should occur via Marka’s self-hosted Mattermost solution. Microsoft Teams may be used instead if the team prefers it and there are no strict requirements to self-host project communications or avoid 3rd-party apps.
+For internal and managed projects, all corporate communication should occur via Marka’s self-hosted Mattermost solution. Microsoft Teams may be used instead if the team prefers it and there are no strict requirements to self-host project communications or avoid 3rd-party apps. Document the chosen tool in project documentation and ensure it aligns with customer requirements.
 
 ![Mattermost Screenshot](Assets/Mattermost_messaging.png)
 
@@ -249,14 +253,14 @@ Find pre-configured `.editorconfig` files for C#, JavaScript and Python in the r
 
 Employ linters and formatters to enforce code style rules automatically.
 
-- C#: Use `CSharpier` as the formatter and linter; keep `Roslyn` rules enabled and enforce 'treat warnings as errors' when ready.
+- C#: Use `CSharpier` as the formatter; use Roslyn/StyleCop analyzers for linting and enable 'treat warnings as errors'.
 - JavaScript: Use `Biome` as both linter and formatter.
 
 #### Commit Message Validation
 
 - All projects must follow Conventional Commits for clarity and automated changelogs.
 - JavaScript projects: Use Husky + lint-staged and `commitlint` to enforce rules locally.
-- C# projects: Use `CSharpier` as the formatter and linter; enforce commit message rules via CI (pipeline checks) or server-side hooks.
+- C# projects: Use `CSharpier` as the formatter; use analyzers (Roslyn/StyleCop) for linting; enforce commit message rules via CI (pipeline checks) or server-side hooks.
 - Alternative to pre-commit hooks: Teams that prefer faster pushes can run style/lint and commit message checks in CI instead of local hooks. In that case, block merges if checks fail.
 
 #### Commit Message Standards
@@ -406,8 +410,31 @@ Example in OpenAPI specification:
 
 ```
 
-**Versioning**
-Use semantic versioning for APIs and increment versions upon breaking changes.
+#### Error Handling and Status Codes
+- Return a consistent error envelope: `{ code, message, details?, traceId }`.
+- Map standard status codes: 400 (validation), 401, 403, 404, 409, 422, 429, 500.
+- Include `traceId` for correlation and troubleshooting.
+
+#### Pagination, Filtering, and Sorting
+- Use `page` and `pageSize` query params (apply sensible defaults and server-side max limits).
+- Use `filter[field]=value` and `sort=field,-otherField` conventions.
+- Return pagination metadata: `total`, `page`, `pageSize`.
+
+#### Idempotency
+- For operations that clients may retry (e.g., create), support `Idempotency-Key` header to prevent duplicate effects.
+
+#### Versioning and Deprecation
+- Use semantic versioning for APIs. Prefer versioning in the path (e.g., `/v1`) for public APIs; headers are acceptable for internal services.
+- Announce deprecations with `Deprecation` and `Sunset` headers and documentation; provide migration guidance and timelines.
+
+#### Caching and Rate Limiting
+- For GET endpoints, support `ETag`/`If-None-Match` and appropriate `Cache-Control`; return 304 when unchanged.
+- Document rate limits. On throttle, return 429 with `Retry-After`.
+
+#### Data Formats
+- JSON property names use camelCase.
+- Timestamps use RFC3339/ISO 8601 in UTC (e.g., `2024-01-02T03:04:05Z`).
+- Prefer stable string enums over numeric codes.
 
 ---
 
@@ -478,6 +505,20 @@ Preferred list of log attributes:
    - Use batching for log exports
    - Implement appropriate buffer sizes
    - Handle backpressure properly
+
+5. Privacy and Compliance
+
+   - Never log secrets or credentials; mask or hash PII and sensitive fields
+   - Use redaction filters/middleware where available
+
+6. Cardinality
+
+   - Avoid high-cardinality labels/attributes in metrics; prefer bounded values
+   - Limit unique values in logs/traces to control storage and costs
+
+7. Retention
+
+   - Set appropriate data retention periods per environment and customer policy
 
 ##### Metrics
 
@@ -584,6 +625,7 @@ All developed projects and infrastructure components must be containerized (if i
   - Functional: Able to build and run the containerized application without errors.
   - Efficient: Optimized for performance and image size.
   - Up-to-date: Regularly maintained to reflect the current state of the project.
+  - Health-aware and secure: Define a `HEALTHCHECK`; expose only required ports; run as non-root; drop unnecessary capabilities; prefer read-only filesystem where possible.
 
 2. Docker Compose File
 
@@ -592,6 +634,7 @@ All developed projects and infrastructure components must be containerized (if i
   - Define all the necessary services, networks, and volumes required to run the solution in a containerized environment.
   - Be actual and functional, ensuring all services can be started and interact correctly.
   - Support local development and testing scenarios by including configurations for required dependencies (e.g., databases, message brokers).
+  - Include healthcheck for services and least-privilege security options (non-root user, read-only rootfs, dropped capabilities) where possible.
 
 #### General Recommendations
 
@@ -609,6 +652,13 @@ All developed projects and infrastructure components must be containerized (if i
 - **Use `.dockerignore`**  
   Exclude unnecessary files (e.g., build artifacts, local configurations) from being copied into the image.
 
+- **Harden containers**
+
+  - Run as a non-root user; drop unnecessary Linux capabilities
+  - Use a read-only filesystem if possible; mount volumes with least privilege
+  - Pin base images by digest when feasible and keep images up to date
+  - Expose only required ports and define explicit `HEALTHCHECK`
+
 #### Image Optimizations
 
 Leverage tools to analyze and optimize Docker images:
@@ -620,6 +670,12 @@ Leverage tools to analyze and optimize Docker images:
   A tool for automatically slimming down Docker images by identifying and removing unnecessary parts.
 
 By following these guidelines, teams can ensure that Docker images are efficient, secure, and optimized for performance.
+
+#### Image Tagging and Retention
+
+- Tag images with semantic versions (e.g., `1.2.3`); optionally append a short commit SHA for traceability (e.g., `1.2.3+abcd123`).
+- Maintain a clear mapping between application releases and image tags.
+- Define image retention policies per environment to prune unreferenced or stale tags regularly.
 
 ---
 
@@ -639,6 +695,12 @@ Document all Web APIs, serverless functions, and data contracts using robust too
 
 **Scalar Example**:
 ![Scalar Screenshot](Assets/Scalar.png)
+
+### Architecture and ADRs
+
+- Capture key architectural decisions as ADRs under `docs/adr/` (use a template); link to major decisions from the README when relevant.
+- Use C4 model diagrams (Context/Container/Component) for core systems; store versioned diagrams under `docs/architecture/`.
+- Per-service README: each service repository should document run/test/lint/build/deploy instructions and required environment variables.
 
 ### Release Changelogs
 
@@ -690,6 +752,9 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 - Coverage policy: Teams set project-wide coverage thresholds; a typical baseline is ≥ 80% overall, and ≥ 90% for critical modules. Enforce via CI coverage gates.
 - **Performance Testing**: Tools like [Gatling](https://gatling.io/) and k6 provide actionable insights into bottlenecks.
 - **End-to-End Testing**: Utilize Playwright for comprehensive coverage across browsers and devices.
+- Coverage tooling and publishing: .NET—use Coverlet + ReportGenerator; JS—use lcov/coverage reporters. Publish test results and coverage summaries in Azure DevOps.
+- Flaky tests policy: mark tests as flaky and quarantine; file an issue, track, and prioritize fixes. Avoid silently ignoring failing tests.
+- Test naming and structure: colocate tests next to code or under `tests/`; use clear names (e.g., `Given_When_Then`) and consistent suffixes (e.g., `*Tests.cs`).
 
 ### Resources
 
@@ -749,6 +814,13 @@ Examples:
 - Storage Account (no separators allowed): `sastockmateprod`
 - Container Registry (no separators allowed): `acrstockmateprod`
 
+#### Azure Resource Governance
+
+- Use Azure Policy to enforce allowed SKUs/regions, required tags, and security baselines.
+- Require tags on all resources: `solution`, `environment`, `owner`, `costCenter` (or `project`), `managedBy`.
+- Configure budgets and cost alerts per subscription/resource group.
+- Prefer management groups to apply policies and budget guardrails centrally.
+
 ---
 
 ### DevOps Practices
@@ -785,6 +857,10 @@ Examples:
   - Prefer YAML pipelines stored in the repo under `.azure-pipelines/`.
   - Keep pipelines simple; split when it improves clarity and speed.
   - Suggested naming: `project-ci.yml`, `project-cd.yml`; reusable templates in `.azure-pipelines/templates/`.
+  - Centralize common logic in reusable templates under `.azure-pipelines/templates/`.
+  - Artifacts: name artifacts consistently and set retention; define a promotion flow from dev → stage → prod.
+  - Concurrency: cancel superseded runs on PR branches and limit concurrent runs per branch.
+  - Configuration: use variable groups and consistent service connection names (e.g., `vg-<project>-<env>`, `sc-<target>`).
 - Separate/auxiliary pipelines:
   - Test suites: UI, integration, end-to-end, performance/load (on demand, nightly, or on tags/branches). May use ephemeral envs or Testcontainers.
   - Infrastructure: Terraform/Pulumi plan/apply with manual approvals; trigger on infra branches or release tags.
@@ -792,6 +868,8 @@ Examples:
 - Quality gates:
   - Block merges if CI fails; require checks on PRs.
   - Set coverage thresholds per team/project; a typical baseline is ≥ 80% overall, and ≥ 90% for critical modules.
+  - Enable secrets scanning (e.g., Gitleaks) on PRs and main.
+  - Enforce license policy rules with Snyk Open Source where required by the project.
 - Performance:
   - Enable caching for package managers (NuGet/npm/pnpm) and Docker layers.
   - Run jobs and stages in parallel when possible.
@@ -967,6 +1045,16 @@ Recommended tool: Snyk
 - Secrets: Store `SNYK_TOKEN` in Azure DevOps variable groups or Key Vault; pass via environment variables only. Never commit tokens or echo them in logs.
 - Container and registry: Scan images post-build; optionally connect ACR to Snyk for registry scanning.
 - Scheduling: Add nightly/weekly scheduled scans to catch newly disclosed CVEs.
+- Remediation SLAs: fix critical within 7 days; high within 30 days; medium/low per team risk assessment with documented exceptions.
+- Dependency hygiene: pin or constrain versions where feasible; schedule routine (e.g., monthly) dependency update PRs.
+
+### Secrets Management
+
+- Store secrets in Azure Key Vault and reference them via Azure DevOps variable groups; do not commit secrets.
+- Never echo secrets in logs or include them in PR descriptions/screenshots.
+- Prefer managed identities/service principals with least privilege.
+- Rotate credentials regularly and document rotation procedures.
+- Enable secret scanning (e.g., Gitleaks) in CI and at the repository host.
 
 ---
 

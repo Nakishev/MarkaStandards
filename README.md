@@ -882,10 +882,8 @@ Examples:
   - Prefer YAML pipelines stored in the repo under `infrastructure/pipelines/` (recommended).
   - Place infrastructure-as-code (IaC) definitions under `infrastructure/` (e.g., `infrastructure/iac/`) for Terraform, Pulumi, Bicep, or ARM templates.
   - Keep pipelines simple; split when it improves clarity and speed.
-  - Suggested naming: `project-ci.yml`, `project-cd.yml`; reusable templates in `.azure-pipelines/templates/`.
-  - Centralize common logic in reusable templates under `.azure-pipelines/templates/`.
-  - Artifacts: name artifacts consistently and set retention; define a promotion flow from dev → stage → prod.
-  - Concurrency: cancel superseded runs on PR branches and limit concurrent runs per branch.
+  - reusable templates if such do exist, store in `infrastructure/pipelines/templates/`.
+  - Centralize common logic in reusable templates under `infrastructure/pipelines/templates/`.    
   - Configuration: use variable groups and consistent service connection names (e.g., `vg-<project>-<env>`, `sc-<target>`).
 - Separate/auxiliary pipelines:
   - Test suites: UI, integration, end-to-end, performance/load (on demand, nightly, or on tags/branches). May use ephemeral envs or Testcontainers.

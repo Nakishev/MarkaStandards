@@ -81,6 +81,7 @@
       - [Monitoring and Auditing](#monitoring-and-auditing)
     - [Vulnerability and Dependency Management](#vulnerability-and-dependency-management)
     - [Secrets Management](#secrets-management)
+- [Tools, Libraries, and Services](#tools-libraries-and-services)
 - [Official Resources](#official-resources)
 
 ---
@@ -1057,6 +1058,139 @@ Recommended tool: Snyk
 - Enable secret scanning (e.g., Gitleaks) in CI and at the repository host.
 
 ---
+
+## Tools, Libraries, and Services
+
+Alphabetical index of tools, libraries, and services mentioned in this handbook, with where to find more details.
+
+- ACR (Azure Container Registry) — Private Docker registry in Azure; used for pushing/pulling images and optional vulnerability scanning integration.
+  See: [CI/CD Pipelines](#cicd-pipelines), [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
+- ADRs (Architecture Decision Records) — Lightweight documents to capture key architecture decisions.
+  See: [Architecture and ADRs](#architecture-and-adrs)
+- AKS (Azure Kubernetes Service) — Managed Kubernetes; referenced in resource naming.
+  See: [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
+- APIM (Azure API Management) — API gateway/management service; referenced in resource naming.
+  See: [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
+- Application Insights (App Insights) — Telemetry platform for logs/metrics/traces in Azure.
+  See: [Observability](#observability)
+- Azure App Service — PaaS web/app hosting target.
+  See: [CI/CD Pipelines](#cicd-pipelines)
+- Azure Container Apps — Serverless containers platform.
+  See: [CI/CD Pipelines](#cicd-pipelines)
+- Azure DevOps (Boards/Repos/Pipelines/Environments) — Project management, repos, CI/CD, environments.
+  See: [Project Management Tools and Resources](#project-management-tools-and-resources), [Version Control and Branching](#version-control-and-branching), [CI/CD Pipelines](#cicd-pipelines), [Test Reports](#test-reports)
+- Azure Key Vault — Secrets management; integrate with pipelines/variable groups and TLS certs.
+  See: [CI/CD Pipelines](#cicd-pipelines), [Secrets Management](#secrets-management), [Web Application Protection](#web-application-protection)
+- Azure Monitor — Monitoring platform used for backup monitoring/alerts.
+  See: [Monitoring and Notifications](#monitoring-and-notifications)
+- Azure Policy — Governance for enforcing rules/tags/regions.
+  See: [Azure Resource Governance](#azure-resource-governance)
+- Azure Private Link — Private network access to PaaS resources (e.g., databases).
+  See: [Secure Database Access](#secure-database-access)
+- Azure Virtual Network (VNet) — Private networking in Azure.
+  See: [Secure Database Access](#secure-database-access)
+- Bacula — On‑prem backup tool.
+  See: [Recommended Tools](#recommended-tools-1)
+- Biome — JavaScript linter and formatter.
+  See: [Linters and Formatters](#linters-and-formatters)
+- C4 Model — Architecture diagramming approach (Context/Container/Component).
+  See: [Architecture and ADRs](#architecture-and-adrs)
+- CSharpier — C# code formatter.
+  See: [Linters and Formatters](#linters-and-formatters)
+- commitlint — Conventional Commits enforcement for commit messages.
+  See: [Commit Message Validation](#commit-message-validation)
+- Confluence — Documentation/wiki platform (secondary).
+  See: [Project Management Tools and Resources](#project-management-tools-and-resources)
+- Conventional Commits — Commit message standard.
+  See: [Commit Message Standards](#commit-message-standards)
+- Coverlet — .NET code coverage tool.
+  See: [Additional Notes](#additional-notes)
+- Dive — Docker image analysis tool.
+  See: [Image Optimizations](#image-optimizations)
+- Docker — Containerization tooling.
+  See: [Containerization](#containerization)
+- Docker Compose — Multi‑container local/stack orchestration.
+  See: [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
+- EditorConfig — Cross‑editor configuration standard.
+  See: [IDE/Editor Configuration](#ideeditor-configuration)
+- Entra ID (Azure AD) — Identity platform for internal accounts.
+  See: [Onboarding](#onboarding)
+- Gatling — Load testing tool.
+  See: [Test Types](#test-types)
+- Gitleaks — Secret scanning tool.
+  See: [CI/CD Pipelines](#cicd-pipelines), [Secrets Management](#secrets-management)
+- Git — Version control system.
+  See: [Version Control and Branching](#version-control-and-branching)
+- GitHub — Repository hosting and Actions.
+  See: [Version Control and Branching](#version-control-and-branching), [CI/CD Pipelines](#cicd-pipelines)
+- Google Cloud Backup and DR — GCP backup solution.
+  See: [Recommended Tools](#recommended-tools-1)
+- Husky — Git hooks manager (JS projects).
+  See: [Commit Message Validation](#commit-message-validation)
+- Jest — JavaScript testing framework.
+  See: [Test Types](#test-types)
+- Jira — Project management platform (secondary).
+  See: [Project Management Tools and Resources](#project-management-tools-and-resources)
+- k6 — Load testing tool.
+  See: [Test Types](#test-types)
+- Keycloak — Self‑hosted identity and access management for production‑grade auth.
+  See: [Authentication and Authorization](#authentication-and-authorization)
+- Kimai — Time‑tracking system.
+  See: [Onboarding](#onboarding)
+- lcov — JavaScript coverage report format/tooling.
+  See: [Additional Notes](#additional-notes)
+- Let's Encrypt — Free TLS certificates (automation for HTTPS).
+  See: [Web Application Protection](#web-application-protection)
+- lint‑staged — Run linters on staged files.
+  See: [Commit Message Validation](#commit-message-validation)
+- locust — Load testing tool.
+  See: [Test Types](#test-types)
+- Mattermost — Self‑hosted team chat.
+  See: [Communication and Process Workflows](#communication-and-process-workflows)
+- Microsoft Teams — Team chat alternative (SaaS).
+  See: [Communication and Process Workflows](#communication-and-process-workflows)
+- OpenTelemetry (OTel) — Observability standard for logs/metrics/traces; OTLP exporters.
+  See: [Observability](#observability)
+- OpenVPN — VPN client/server used for secure remote access.
+  See: [Access to Internal Resources](#access-to-internal-resources)
+- Portainer — Container/stack management (for docker‑compose deployments).
+  See: [Deployment Types](#deployment-types)
+- Playwright — UI and end‑to‑end testing framework.
+  See: [Test Types](#test-types)
+- ReportGenerator — .NET coverage report generator.
+  See: [Additional Notes](#additional-notes)
+- Roslyn/StyleCop Analyzers — C# analyzers for code quality rules.
+  See: [Linters and Formatters](#linters-and-formatters)
+- rsync — File synchronization for on‑prem backups.
+  See: [Recommended Tools](#recommended-tools-1)
+- Scalar — API documentation UI.
+  See: [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
+- SlimToolkit (slim) — Docker image slimming tool.
+  See: [Image Optimizations](#image-optimizations)
+- Snyk — Security scanning for code, dependencies, containers, IaC; PR checks and CI gates.
+  See: [Vulnerability and Dependency Management](#vulnerability-and-dependency-management), [CI/CD Pipelines](#cicd-pipelines)
+- SwaggerUI — API documentation UI (basic alternative).
+  See: [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
+- Testcontainers — Integration testing with containers.
+  See: [Test Types](#test-types)
+- Testing Library — JS DOM testing utilities.
+  See: [Test Types](#test-types)
+- Uptime Kuma — Self‑hosted uptime and alerting platform.
+  See: [Alerting and Uptime Monitoring](#alerting-and-uptime-monitoring)
+- Veeam — On‑prem backup solution.
+  See: [Recommended Tools](#recommended-tools-1)
+- Vitest — Fast unit testing for JS/TS.
+  See: [Test Types](#test-types)
+- wrk — HTTP benchmarking tool.
+  See: [Test Types](#test-types)
+- AWS Backup — Managed backup in AWS.
+  See: [Recommended Tools](#recommended-tools-1)
+- Azure Backup — Managed backup in Azure.
+  See: [Recommended Tools](#recommended-tools-1)
+- Azure Site Recovery — Disaster recovery for Azure workloads.
+  See: [Recommended Tools](#recommended-tools-1)
+- Azure Web Application Firewall (WAF) — Web app protection.
+  See: [Web Application Protection](#web-application-protection)
 
 # Official Resources
 

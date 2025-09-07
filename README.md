@@ -777,7 +777,7 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 - Coverage policy: Teams set project-wide coverage thresholds; a typical baseline is ≥ 80% overall, and ≥ 90% for critical modules. Enforce via CI coverage gates.
 - **Performance Testing**: Tools like [Gatling](https://gatling.io/) and k6 provide actionable insights into bottlenecks.
 - **End-to-End Testing**: Utilize Playwright for comprehensive coverage across browsers and devices.
-- Coverage tooling and publishing: .NET—use Coverlet + ReportGenerator; JS—use lcov/coverage reporters. Publish test results and coverage summaries in Azure DevOps.
+- Coverage tooling and publishing: .NET—collect with the built-in "XPlat Code Coverage" data collector and publish Cobertura reports in Azure DevOps (optionally generate local HTML with ReportGenerator); JS—use lcov/coverage reporters. Always publish test results and coverage summaries in Azure DevOps.
 - Flaky tests policy: mark tests as flaky and quarantine; file an issue, track, and prioritize fixes. Avoid silently ignoring failing tests.
 - Test naming and structure: colocate tests next to code or under `tests/`; use clear names (e.g., `Given_When_Then`) and consistent suffixes (e.g., `*Tests.cs`).
 
@@ -939,6 +939,64 @@ Notes:
 - Prefer the official Snyk Azure DevOps extension for richer PR annotations and results in the UI; use the CLI as a portable fallback.
 - Set severity gates via `--severity-threshold` (e.g., high) to fail builds on critical/high issues by default.
 - Manage temporary ignores in a `.snyk` policy file with required reason and expiry; review regularly.
+
+##### Example: .NET tests + Cobertura coverage publishing (Azure DevOps)
+
+Collect and publish code coverage in CI. For .NET, use the built-in "XPlat Code Coverage" data collector and publish Cobertura format so Azure DevOps can render coverage summaries.
+
+```yaml path=null start=null
+# .NET tests with coverage collection and publishing in Azure DevOps
+# Key points:
+# - Collect coverage via the built-in "XPlat Code Coverage" data collector
+# - Publish Cobertura format so Azure DevOps can render summaries
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: Test (.NET) + collect coverage
+    inputs:
+      command: test
+      projects: '**/*Tests.csproj'
+      arguments: >
+        -c Release
+        -r $(Agent.TempDirectory)/TestResults
+        --collect "XPlat Code Coverage"
+        --logger "trx;LogFileName=test-results.trx"
+      publishTestResults: false
+
+  - script: |
+      echo "Listing TestResults:"
+      ls -R $(Agent.TempDirectory)/TestResults || true
+    displayName: Debug: list test results
+
+  - task: PublishTestResults@2
+    displayName: Publish test results (TRX)
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '$(Agent.TempDirectory)/TestResults/**/*.trx'
+      searchFolder: '$(Agent.TempDirectory)/TestResults'
+      mergeTestResults: true
+
+  - task: PublishCodeCoverageResults@2
+    displayName: Publish code coverage (Cobertura)
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml'
+      reportDirectory: '$(Agent.TempDirectory)/TestResults/**/coverage'
+      failIfCoverageEmpty: true
+```
+
+Sample Azure DevOps visuals for a pipeline test stage:
+
+- Tests tab:
+
+![Azure DevOps Pipeline Tests](Assets/azure-devops-test-results.png)
+
+- Code Coverage tab:
+
+![Azure DevOps Pipeline Code Coverage](Assets/azure-devops-test-coverage.png)
+
+- Risk Hotspots panel:
+
+![Azure DevOps Pipeline Risk Hotspots](Assets/azure-devops-test-risk-hot-spots.png)
 
 #### Orchestration and Scheduled Tasks
 
@@ -1120,6 +1178,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Architecture and ADRs](#architecture-and-adrs)
 - CSharpier — C# code formatter.
   See: [Linters and Formatters](#linters-and-formatters)
+- Cobertura — Code coverage report format we publish from pipelines.
+  See: [CI/CD Pipelines](#cicd-pipelines)
 - commitlint — Conventional Commits enforcement for commit messages.
   See: [Commit Message Validation](#commit-message-validation)
 - Confluence — Documentation/wiki platform (secondary).
@@ -1206,6 +1266,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Test Types](#test-types)
 - wrk — HTTP benchmarking tool.
   See: [Test Types](#test-types)
+- XPlat Code Coverage — .NET cross‑platform coverage data collector used in pipelines.
+  See: [CI/CD Pipelines](#cicd-pipelines)
 - AWS Backup — Managed backup in AWS.
   See: [Recommended Tools](#recommended-tools-1)
 - Azure Backup — Managed backup in Azure.

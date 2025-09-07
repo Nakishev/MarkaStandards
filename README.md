@@ -3,6 +3,8 @@
 **Table of Contents**
 
 - [Introduction](#introduction)
+  - [Applicability and Exceptions](#applicability-and-exceptions)
+  - [Process Maturity Levels](#process-maturity-levels)
 - [Process Standards and Recommendations](#process-standards-and-recommendations)
   - [Human Resources (HR)](#human-resources-hr)
     - [Tools](#tools)
@@ -89,6 +91,28 @@
 # Introduction
 
 This document presents Marka’s official processes, standards, and best practices. It ensures that all teams operate with consistency, quality, and efficiency, while maintaining alignment with organizational goals. Use this guide as a reference for standard operating procedures, technical conventions, and recommended workflows across all projects and departments within Marka.
+
+### Applicability and Exceptions
+
+While this document defines Marka’s standards, some projects (e.g., small scope, legacy constraints, tech‑stack limitations, budget restrictions, limited cloud availability, or explicit customer requirements) may treat it as guidance and best practices rather than strict policy. In such cases, apply these principles pragmatically and document any deviations and their rationale in the project’s README or architecture/ADR notes.
+
+### Process Maturity Levels
+
+Use the following levels to describe and plan the maturity of a project’s processes relative to Marka’s standards:
+
+- Level 1 — Baseline (Guideline Adoption)
+  - Basic branching and PRs; tests for business logic changes; manual or simple scripted deployments acceptable.
+  - Core code style followed informally; minimal logging/monitoring; ad‑hoc backups.
+  - Document deviations and a plan to improve where practical.
+- Level 2 — Standardized (Core Standard)
+  - Enforced code style and PR process; CI with lint/format/build/unit tests/coverage gates; security scans (e.g., Snyk) on PRs.
+  - Containerized services with health checks; environments (dev/stage/prod) with approvals; secrets via Key Vault.
+  - Basic observability and release tagging; documented rollback procedures.
+- Level 3 — Advanced (Full Standard)
+  - Comprehensive observability (OTel logs/metrics/traces), coverage thresholds (≥80% overall, ≥90% critical), IaC for infra, scheduled workflows (e.g., Kestra), uptime monitoring (e.g., Uptime Kuma), and governance (Azure Policy, budgets, tags).
+  - Continuous security scanning, dependency hygiene cadences, and formal architecture/ADRs.
+
+Define the current and target maturity level at project kick‑off and revisit each quarter or major release.
 
 ---
 

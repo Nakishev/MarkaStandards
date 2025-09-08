@@ -47,7 +47,7 @@
       - [General Recommendations](#general-recommendations)
       - [Image Optimizations](#image-optimizations)
       - [Image Tagging and Retention](#image-tagging-and-retention)
-  - [Documentation](#documentation)
+- [Documentation](#documentation)
     - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
     - [Architecture and ADRs](#architecture-and-adrs)
     - [Release Changelogs](#release-changelogs)
@@ -65,6 +65,7 @@
     - [DevOps Practices](#devops-practices)
       - [Deployment Types](#deployment-types)
       - [CI/CD Pipelines](#cicd-pipelines)
+      - [Code Quality Analysis (SonarQube)](#code-quality-analysis-sonarqube-community-edition)
       - [Orchestration and Scheduled Tasks](#orchestration-and-scheduled-tasks)
       - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
   - [Security](#security)
@@ -998,6 +999,159 @@ Sample Azure DevOps visuals for a pipeline test stage:
 
 ![Azure DevOps Pipeline Risk Hotspots](Assets/azure-devops-test-risk-hot-spots.png)
 
+#### Code Quality Analysis (SonarQube Community Edition)
+
+Use SonarQube Community Edition as the standard static code quality platform for .NET and JavaScript/TypeScript code. It detects bugs, code smells, duplicated code, and tracks coverage. Enforce a Quality Gate in CI so changes that lower code health fail early.
+
+Key benefits:
+- Continuous visibility into maintainability (complexity, duplication, code smells) and potential bugs
+- Clear Quality Gate with pass/fail criteria on new code (coverage, duplicated lines, issues)
+- Works on‑prem/self‑hosted; no vendor lock‑in; free Community Edition
+
+Limitations (Community Edition):
+- Pull Request decoration in Azure DevOps is not available. Analyze PR branches and fail the build on the Quality Gate instead.
+
+Setup locally (recommended via Docker Compose):
+
+```yaml path=null start=null
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonarqube
+    volumes:
+      - sonardb:/var/lib/postgresql/data
+  sonarqube:
+    image: sonarqube:community
+    depends_on: [db]
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+      - sonar_logs:/opt/sonarqube/logs
+volumes:
+  sonardb: {}
+  sonar_data: {}
+  sonar_extensions: {}
+  sonar_logs: {}
+```
+
+After startup, open http://localhost:9000 (default admin/admin), change the password, create a project, and generate a token. Store the token securely.
+
+Azure DevOps Pipelines integration (using the official SonarQube tasks):
+
+```yaml path=null start=null
+# Requires the "SonarQube" Azure DevOps extension and a service connection
+# named SonarQubeService. No secrets are echoed in logs.
+steps:
+  - task: SonarQubePrepare@5
+    displayName: SonarQube Prepare (MSBuild)
+    inputs:
+      SonarQube: 'SonarQubeService'            # Service connection name
+      scannerMode: 'MSBuild'
+      projectKey: 'org_stockmate_app'
+      projectName: 'StockMate Application'
+      extraProperties: |
+        sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/TestResults/**/*.trx
+        sonar.cs.cobertura.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml
+        sonar.exclusions=**/*.Designer.cs,**/*.g.cs
+
+  # Build + tests + coverage (example for .NET; re-use your project steps)
+  - task: DotNetCoreCLI@2
+    displayName: Test (.NET) + collect coverage
+    inputs:
+      command: test
+      projects: '**/*Tests.csproj'
+      arguments: >
+        -c Release
+        -r $(Agent.TempDirectory)/TestResults
+        --collect "XPlat Code Coverage"
+        --logger "trx;LogFileName=test-results.trx"
+      publishTestResults: false
+
+  - task: SonarQubeAnalyze@5
+    displayName: SonarQube Analyze
+
+  - task: SonarQubePublish@5
+    displayName: SonarQube Quality Gate
+    inputs:
+      pollingTimeoutSec: '300'   # wait for server-side analysis and fail build on gate failure
+```
+
+Alternative: CLI (no service connection) with dotnet-sonarscanner
+
+```yaml path=null start=null
+steps:
+  - script: dotnet tool install -g dotnet-sonarscanner
+    displayName: Install SonarScanner for .NET
+
+  - script: >
+      dotnet sonarscanner begin
+      /k:"org_stockmate_app"
+      /d:sonar.host.url="$(SONAR_HOST_URL)"
+      /d:sonar.login="$(SONAR_TOKEN)"
+      /d:sonar.cs.vstest.reportsPaths="$(Agent.TempDirectory)/TestResults/**/*.trx"
+      /d:sonar.cs.cobertura.reportsPaths="$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml"
+    displayName: SonarScanner begin
+    env:
+      SONAR_HOST_URL: $(SONAR_HOST_URL)
+      SONAR_TOKEN: $(SONAR_TOKEN)
+
+  - task: DotNetCoreCLI@2
+    displayName: Build + Test + Coverage
+    inputs:
+      command: test
+      projects: '**/*Tests.csproj'
+      arguments: >
+        -c Release
+        -r $(Agent.TempDirectory)/TestResults
+        --collect "XPlat Code Coverage"
+        --logger "trx;LogFileName=test-results.trx"
+      publishTestResults: false
+
+  - script: dotnet sonarscanner end /d:sonar.login="$(SONAR_TOKEN)"
+    displayName: SonarScanner end
+    env:
+      SONAR_TOKEN: $(SONAR_TOKEN)
+```
+
+JavaScript/TypeScript projects:
+- Use the SonarScanner CLI and point to lcov coverage: add `sonar.javascript.lcov.reportPaths=coverage/lcov.info` under `extraProperties`.
+
+Recommendation: Use SonarQube together with Snyk
+- Complementary focus areas: SonarQube covers code quality/maintainability and potential bugs; Snyk covers security (SAST), open‑source dependencies and licenses (SCA), container and IaC security.
+- Defense in depth: running both on PRs and main ensures you catch regressions in code health and security issues before merge.
+- Gating: Fail the pipeline if either the SonarQube Quality Gate fails or Snyk finds high/critical issues by policy.
+
+Minimal combined gating example:
+
+```yaml path=null start=null
+steps:
+  # ... SonarQubePrepare + build/test/coverage as above ...
+  - task: SonarQubeAnalyze@5
+  - task: SonarQubePublish@5
+    inputs:
+      pollingTimeoutSec: '300'
+
+  # Snyk (token from a secure variable/Key Vault)
+  - script: npm install -g snyk
+    displayName: Install Snyk CLI
+  - script: |
+      snyk test --severity-threshold=high --all-projects
+      snyk code test --severity-threshold=high
+    displayName: Snyk Code + Open Source scans
+    env:
+      SNYK_TOKEN: $(SNYK_TOKEN)
+```
+
 #### Orchestration and Scheduled Tasks
 
 - Use Kestra (open-source, cloud-agnostic, self-hosted) to orchestrate scheduled tasks and flows such as maintenance jobs, data pipelines, and backups within Marka’s infrastructure when appropriate.
@@ -1250,6 +1404,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
 - SlimToolkit (slim) — Docker image slimming tool.
   See: [Image Optimizations](#image-optimizations)
+- SonarQube — Static code quality and coverage platform (Community Edition supported). Integrate via Azure DevOps tasks or dotnet-sonarscanner; enforce Quality Gate in CI.
+  See: [Code Quality Analysis (SonarQube Community Edition)](#code-quality-analysis-sonarqube-community-edition)
 - Snyk — Security scanning for code, dependencies, containers, IaC; PR checks and CI gates.
   See: [Vulnerability and Dependency Management](#vulnerability-and-dependency-management), [CI/CD Pipelines](#cicd-pipelines)
 - SwaggerUI — API documentation UI (basic alternative).

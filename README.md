@@ -110,8 +110,15 @@ Use the following levels to describe and plan the maturity of a project’s proc
   - Containerized services with health checks; environments (dev/stage/prod) with approvals; secrets via Key Vault.
   - Basic observability and release tagging; documented rollback procedures.
 - Level 3 — Advanced (Full Standard)
-  - Comprehensive observability (OTel logs/metrics/traces), coverage thresholds (≥80% overall, ≥90% critical), IaC for infra, scheduled workflows (e.g., Kestra), uptime monitoring (e.g., Uptime Kuma), and governance (Azure Policy, budgets, tags).
-  - Continuous security scanning, dependency hygiene cadences, and formal architecture/ADRs.
+  - Comprehensive observability (OTel logs/metrics/traces); code coverage thresholds (≥80% overall, ≥90% for critical modules) with reports published in Azure DevOps; IaC for infra; scheduled workflows (e.g., Kestra); uptime monitoring (Uptime Kuma); and governance (Azure Policy, budgets, tags).
+  - Formal architecture/ADRs; per‑service README with run/test/deploy instructions.
+- Level 4 — Secure & Intelligent (Elite Standard)
+  - Security-by-default gates: mandatory Snyk scans (Code/SAST, Open Source/SCA+licenses, Container, IaC) on PRs and main; fail on high/critical by default; nightly/weekly scheduled scans and ACR/registry scanning; documented remediation SLAs (critical ≤7 days, high ≤30 days).
+  - Deep code quality analysis: SonarQube CE integrated into pipelines; Cobertura coverage imported; enforce Quality Gate on new code (coverage ≥80% on new code, duplication ≤3%, Maintainability and Reliability ratings A); block merges on gate failure.
+  - Secrets protection: all secrets in Key Vault; mandatory secret scanning (e.g., Gitleaks) in CI and at repo host; pipelines fail on detected secrets.
+  - Coverage as a gate: branch and line coverage thresholds enforced per component; critical modules target ≥90% line and meaningful branch coverage; publish risk hotspots and coverage dashboards in Azure DevOps.
+  - Supply chain hardening: pin/lock dependencies; signed container images where applicable; container base images kept current; Snyk Container gating active on images built in CI.
+  - Governance & compliance: policy‑as‑code (Azure Policy), environment approvals and audit trails, release tagging and changelogs; periodic security/quality reviews with action items tracked.
 
 Define the current and target maturity level at project kick‑off and revisit each quarter or major release.
 

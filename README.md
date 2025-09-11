@@ -367,6 +367,12 @@ Code reviews help us ship fast without breaking quality. Keep it simple, respect
 
 ---
 
+### Automated Dependency Updates
+
+To keep project dependencies up to date, teams may adopt Renovate where it makes sense for the project. Configure Renovate to create automated pull requests for dependency updates and integrate it into your CI/CD pipelines and PR review flow (scheduling, grouping, and rules can be tailored per repository or via shared presets). See https://docs.renovatebot.com/ for setup and configuration details.
+
+---
+
 ### Web API Development Conventions
 
 #### REST Compliance
@@ -1403,6 +1409,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Test Types](#test-types)
 - ReportGenerator — .NET coverage report generator.
   See: [Additional Notes](#additional-notes)
+- Renovate — Automated dependency update bot; integrates with CI/CD and PR review flow to keep dependencies current.
+  See: https://docs.renovatebot.com/
 - Roslyn/StyleCop Analyzers — C# analyzers for code quality rules.
   See: [Linters and Formatters](#linters-and-formatters)
 - rsync — File synchronization for on‑prem backups.

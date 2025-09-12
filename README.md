@@ -3,8 +3,8 @@
 **Table of Contents**
 
 - [Introduction](#introduction)
-  - [Applicability and Exceptions](#applicability-and-exceptions)
-  - [Process Maturity Levels](#process-maturity-levels)
+    - [Applicability and Exceptions](#applicability-and-exceptions)
+    - [Process Maturity Levels](#process-maturity-levels)
 - [Process Standards and Recommendations](#process-standards-and-recommendations)
   - [Human Resources (HR)](#human-resources-hr)
     - [Tools](#tools)
@@ -28,7 +28,23 @@
       - [Commit Message Validation](#commit-message-validation)
       - [Commit Message Standards](#commit-message-standards)
     - [Code Review and Pull Requests](#code-review-and-pull-requests)
+      - [Creating a Pull Request](#creating-a-pull-request)
+      - [Review Process](#review-process)
+      - [Merging](#merging)
+    - [Automated Dependency Updates](#automated-dependency-updates)
+    - [Framework-Specific Guidelines](#framework-specific-guidelines)
+      - [React](#react)
+        - [Component Structure and Props](#component-structure-and-props)
     - [Web API Development Conventions](#web-api-development-conventions)
+      - [REST Compliance](#rest-compliance)
+      - [REST Methods](#rest-methods)
+      - [Resource Structures](#resource-structures)
+      - [Error Handling and Status Codes](#error-handling-and-status-codes)
+      - [Pagination, Filtering, and Sorting](#pagination-filtering-and-sorting)
+      - [Idempotency](#idempotency)
+      - [Versioning and Deprecation](#versioning-and-deprecation)
+      - [Caching and Rate Limiting](#caching-and-rate-limiting)
+      - [Data Formats](#data-formats)
     - [Observability](#observability)
       - [Low-scale solutions (demo, training, etc. projects)](#low-scale-solutions-demo-training-etc-projects)
       - [High-scale solutions for production](#high-scale-solutions-for-production)
@@ -47,12 +63,12 @@
       - [General Recommendations](#general-recommendations)
       - [Image Optimizations](#image-optimizations)
       - [Image Tagging and Retention](#image-tagging-and-retention)
-    - [Documentation](#documentation)
-      - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
-      - [Architecture and ADRs](#architecture-and-adrs)
-      - [Release Changelogs](#release-changelogs)
-      - [Test Reports](#test-reports)
-        - [Recommended Tools:](#recommended-tools)
+  - [Documentation](#documentation)
+    - [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
+    - [Architecture and ADRs](#architecture-and-adrs)
+    - [Release Changelogs](#release-changelogs)
+    - [Test Reports](#test-reports)
+      - [Recommended Tools:](#recommended-tools)
   - [Testing](#testing)
     - [Test Types](#test-types)
     - [Additional Notes](#additional-notes)
@@ -65,7 +81,8 @@
     - [DevOps Practices](#devops-practices)
       - [Deployment Types](#deployment-types)
       - [CI/CD Pipelines](#cicd-pipelines)
-      - [Code Quality Analysis (SonarQube)](#code-quality-analysis-sonarqube-community-edition)
+        - [Example: .NET tests + Cobertura coverage publishing (Azure DevOps)](#example-net-tests--cobertura-coverage-publishing-azure-devops)
+      - [Code Quality Analysis (SonarQube Community Edition)](#code-quality-analysis-sonarqube-community-edition)
       - [Orchestration and Scheduled Tasks](#orchestration-and-scheduled-tasks)
       - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
   - [Security](#security)
@@ -84,7 +101,7 @@
       - [Monitoring and Auditing](#monitoring-and-auditing)
     - [Vulnerability and Dependency Management](#vulnerability-and-dependency-management)
     - [Secrets Management](#secrets-management)
-- [Tools, Libraries, and Services](#tools-libraries-and-services)
+  - [Tools, Libraries, and Services](#tools-libraries-and-services)
 - [Official Resources](#official-resources)
 
 ---
@@ -106,11 +123,11 @@ Use the following levels to describe and plan the maturity of a project’s proc
   - Core code style followed informally; minimal logging/monitoring; ad‑hoc backups.
   - Document deviations and a plan to improve where practical.
 - Level 2 — Standardized (Core Standard)
-  - Enforced code style and PR process; CI with lint/format/build/unit tests/coverage gates; security scans (e.g., Snyk) on PRs.
+  - Enforced code style and PR process; CI with lint/format/build/unit tests/coverage gates.
   - Containerized services with health checks; environments (dev/stage/prod) with approvals; secrets via Key Vault.
   - Basic observability and release tagging; documented rollback procedures.
 - Level 3 — Advanced (Full Standard)
-  - Comprehensive observability (OTel logs/metrics/traces); code coverage thresholds (≥80% overall, ≥90% for critical modules) with reports published in Azure DevOps; IaC for infra; scheduled workflows (e.g., Kestra); uptime monitoring (Uptime Kuma); and governance (Azure Policy, budgets, tags).
+  - Comprehensive observability (OTel logs/metrics/traces, Azure AppInsights, Azure Log Workspaces); code coverage thresholds (≥80% overall, ≥90% for critical modules) with reports published in Azure DevOps; IaC for infra; scheduled workflows (e.g., Azure Functions, Kestra); uptime monitoring (Azure Monitor, Uptime Kuma); and governance (Azure Policy, budgets, tags).
   - Formal architecture/ADRs; per‑service README with run/test/deploy instructions.
 - Level 4 — Secure & Intelligent (Elite Standard)
   - Security-by-default gates: mandatory Snyk scans (Code/SAST, Open Source/SCA+licenses, Container, IaC) on PRs and main; fail on high/critical by default; nightly/weekly scheduled scans and ACR/registry scanning; documented remediation SLAs (critical ≤7 days, high ≤30 days).
@@ -373,6 +390,38 @@ To keep project dependencies up to date, teams may adopt Renovate where it makes
 
 ---
 
+### Framework-Specific Guidelines
+
+#### React
+
+##### Component Structure and Props
+
+To ensure consistency and maintainability in React components, follow these guidelines for props and internal structure.
+
+**Component Props:**
+
+- **Use Interfaces for Props:** Always define component props using TypeScript `interface` instead of `type`.
+- **Naming Convention:** Append `Props` to the interface name for clarity (e.g., `MyComponentProps`).
+
+**Component Internal Structure:**
+
+Organize the inside of your React components in the following order to improve readability and predictability:
+
+1.  **Hooks:** Group all hooks at the top.
+    - Start with context hooks (e.g., `useAuth`).
+    - Follow with state hooks (`useState`, `useReducer`).
+    - Then, reference hooks (`useRef`).
+2.  **Effects:** Place `useEffect` hooks after all other hooks.
+3.  **Helper Functions:** Define component-specific helper functions.
+    - _Note: Universal or reusable helper functions should be placed in a dedicated `helpers` folder outside the component._
+4.  **Event Handlers:** Define all event handlers (e.g., `handleClick`, `onChange`).
+5.  **Early Returns:** Implement any early returns (e.g., for loading or error states) to avoid nested logic.
+6.  **Render Logic:** Prepare any variables or constants needed for rendering.
+    - Example: `const buttonText = isLoading ? 'Loading...' : 'Submit';`
+7.  **Return Statement:** Finally, the JSX to be rendered.
+
+---
+
 ### Web API Development Conventions
 
 #### REST Compliance
@@ -383,13 +432,13 @@ Adhere to REST principles (Level 0–2 of Richardson Maturity Model). Level 3 (H
 
 Below is a list of methods that Marka REST services SHOULD support. Not all resources will support all methods, but all resources using the methods below MUST conform to their usage.
 
-| Method | Description | Is Idempotent |
-| ------ | ----------- | ------------- |
-| GET    | Return the current value of an object | True |
-| PUT    | Replace an object, or create a named object, when applicable | True |
-| DELETE | Delete an object | True |
-| POST   | Create a new object based on the data provided, or submit a command | False |
-| PATCH  | Apply a partial update to an object | False |
+| Method | Description                                                         | Is Idempotent |
+| ------ | ------------------------------------------------------------------- | ------------- |
+| GET    | Return the current value of an object                               | True          |
+| PUT    | Replace an object, or create a named object, when applicable        | True          |
+| DELETE | Delete an object                                                    | True          |
+| POST   | Create a new object based on the data provided, or submit a command | False         |
+| PATCH  | Apply a partial update to an object                                 | False         |
 
 #### Resource Structures
 
@@ -450,27 +499,33 @@ Example in OpenAPI specification:
 ```
 
 #### Error Handling and Status Codes
+
 - Return a consistent error envelope: `{ code, message, details?, traceId }`.
 - Map standard status codes: 400 (validation), 401, 403, 404, 409, 422, 429, 500.
 - Include `traceId` for correlation and troubleshooting.
 
 #### Pagination, Filtering, and Sorting
+
 - Use `page` and `pageSize` query params (apply sensible defaults and server-side max limits).
 - Use `filter[field]=value` and `sort=field,-otherField` conventions.
 - Return pagination metadata: `total`, `page`, `pageSize`.
 
 #### Idempotency
+
 - For operations that clients may retry (e.g., create), support `Idempotency-Key` header to prevent duplicate effects.
 
 #### Versioning and Deprecation
+
 - Use semantic versioning for APIs. Prefer versioning in the path (e.g., `/v1`) for public APIs; headers are acceptable for internal services.
 - Announce deprecations with `Deprecation` and `Sunset` headers and documentation; provide migration guidance and timelines.
 
 #### Caching and Rate Limiting
+
 - For GET endpoints, support `ETag`/`If-None-Match` and appropriate `Cache-Control`; return 304 when unchanged.
 - Document rate limits. On throttle, return 429 with `Retry-After`.
 
 #### Data Formats
+
 - JSON property names use camelCase.
 - Timestamps use RFC3339/ISO 8601 in UTC (e.g., `2024-01-02T03:04:05Z`).
 - Prefer stable string enums over numeric codes.
@@ -541,6 +596,7 @@ Preferred list of log attributes:
    - Use tail-based sampling for error cases
 
 4. Performance
+
    - Use batching for log exports
    - Implement appropriate buffer sizes
    - Handle backpressure properly
@@ -652,7 +708,6 @@ All developed projects and infrastructure components must be containerized (if i
   - Must be usable in automated testing frameworks, such as Testcontainers, to enable robust and consistent integration testing.
 - Standardized Tooling:
   - Docker must be used as the primary tool for containerization to maintain consistency and alignment with industry standards.
-
 
 #### Dockerfile and Docker Compose Requirements
 
@@ -776,14 +831,14 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 
 ### Test Types
 
-| Test Type | Description | Recommended Tools | Requirement |
-| --- | --- | --- | --- |
-| Unit Tests | Validate individual units of code in isolation. TDD is recommended for better code quality. | XUnit (C#), Jest/Vitest + Testing Library (JS) | Mandatory for all projects |
-| UI Tests | Test the graphical user interface of an application. | Playwright | Optional |
-| Integration Tests | Ensure that components or services work together as expected. | Testcontainers (C#), Testcontainers + Playwright (JS) | Optional |
-| End-to-End Tests | Validate complete workflows from start to finish. | Playwright | Optional |
-| Performance/Load Tests | Assess the system's behavior under various conditions, including heavy load and stress scenarios. | gatling, k6, wrk, locust | Optional |
-| Acceptance Tests | Verify the system meets external stakeholders' requirements and specifications. | Playwright, or tool appropriate to project scope | Optional (for external projects) |
+| Test Type              | Description                                                                                       | Recommended Tools                                     | Requirement                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------- |
+| Unit Tests             | Validate individual units of code in isolation. TDD is recommended for better code quality.       | XUnit (C#), Jest/Vitest + Testing Library (JS)        | Mandatory for all projects       |
+| UI Tests               | Test the graphical user interface of an application.                                              | Playwright                                            | Optional                         |
+| Integration Tests      | Ensure that components or services work together as expected.                                     | Testcontainers (C#), Testcontainers + Playwright (JS) | Optional                         |
+| End-to-End Tests       | Validate complete workflows from start to finish.                                                 | Playwright                                            | Optional                         |
+| Performance/Load Tests | Assess the system's behavior under various conditions, including heavy load and stress scenarios. | gatling, k6, wrk, locust                              | Optional                         |
+| Acceptance Tests       | Verify the system meets external stakeholders' requirements and specifications.                   | Playwright, or tool appropriate to project scope      | Optional (for external projects) |
 
 ### Additional Notes
 
@@ -872,7 +927,6 @@ Examples:
 - **Deployment as a docker-compose stack**  
   Deployment as a docker-compose stack to a Marka-managed Portainer instance is used for archived projects, or projects with low activity. In this case, deployments can be made manually or automatically (using a connected repository webhook or a scheduled task).
 
-
 #### CI/CD Pipelines
 
 - Platform: Use Azure DevOps Pipelines as the primary CI/CD platform. GitHub Actions may be used for secondary/training projects.
@@ -897,7 +951,7 @@ Examples:
   - Place infrastructure-as-code (IaC) definitions under `infrastructure/` (e.g., `infrastructure/iac/`) for Terraform, Pulumi, Bicep, or ARM templates.
   - Keep pipelines simple; split when it improves clarity and speed.
   - reusable templates if such do exist, store in `infrastructure/pipelines/templates/`.
-  - Centralize common logic in reusable templates under `infrastructure/pipelines/templates/`.    
+  - Centralize common logic in reusable templates under `infrastructure/pipelines/templates/`.
   - Configuration: use variable groups and consistent service connection names (e.g., `vg-<project>-<env>`, `sc-<target>`).
 - Separate/auxiliary pipelines:
   - Test suites: UI, integration, end-to-end, performance/load (on demand, nightly, or on tags/branches). May use ephemeral envs or Testcontainers.
@@ -950,6 +1004,7 @@ steps:
 ```
 
 Notes:
+
 - Prefer the official Snyk Azure DevOps extension for richer PR annotations and results in the UI; use the CLI as a portable fallback.
 - Set severity gates via `--severity-threshold` (e.g., high) to fail builds on critical/high issues by default.
 - Manage temporary ignores in a `.snyk` policy file with required reason and expiry; review regularly.
@@ -1017,11 +1072,13 @@ Sample Azure DevOps visuals for a pipeline test stage:
 Use SonarQube Community Edition as the standard static code quality platform for .NET and JavaScript/TypeScript code. It detects bugs, code smells, duplicated code, and tracks coverage. Enforce a Quality Gate in CI so changes that lower code health fail early.
 
 Key benefits:
+
 - Continuous visibility into maintainability (complexity, duplication, code smells) and potential bugs
 - Clear Quality Gate with pass/fail criteria on new code (coverage, duplicated lines, issues)
 - Works on‑prem/self‑hosted; no vendor lock‑in; free Community Edition
 
 Limitations (Community Edition):
+
 - Pull Request decoration in Azure DevOps is not available. Analyze PR branches and fail the build on the Quality Gate instead.
 
 Setup locally (recommended via Docker Compose):
@@ -1068,10 +1125,10 @@ steps:
   - task: SonarQubePrepare@5
     displayName: SonarQube Prepare (MSBuild)
     inputs:
-      SonarQube: 'SonarQubeService'            # Service connection name
-      scannerMode: 'MSBuild'
-      projectKey: 'org_stockmate_app'
-      projectName: 'StockMate Application'
+      SonarQube: "SonarQubeService" # Service connection name
+      scannerMode: "MSBuild"
+      projectKey: "org_stockmate_app"
+      projectName: "StockMate Application"
       extraProperties: |
         sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/TestResults/**/*.trx
         sonar.cs.cobertura.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml
@@ -1082,7 +1139,7 @@ steps:
     displayName: Test (.NET) + collect coverage
     inputs:
       command: test
-      projects: '**/*Tests.csproj'
+      projects: "**/*Tests.csproj"
       arguments: >
         -c Release
         -r $(Agent.TempDirectory)/TestResults
@@ -1096,7 +1153,7 @@ steps:
   - task: SonarQubePublish@5
     displayName: SonarQube Quality Gate
     inputs:
-      pollingTimeoutSec: '300'   # wait for server-side analysis and fail build on gate failure
+      pollingTimeoutSec: "300" # wait for server-side analysis and fail build on gate failure
 ```
 
 Alternative: CLI (no service connection) with dotnet-sonarscanner
@@ -1122,7 +1179,7 @@ steps:
     displayName: Build + Test + Coverage
     inputs:
       command: test
-      projects: '**/*Tests.csproj'
+      projects: "**/*Tests.csproj"
       arguments: >
         -c Release
         -r $(Agent.TempDirectory)/TestResults
@@ -1137,9 +1194,11 @@ steps:
 ```
 
 JavaScript/TypeScript projects:
+
 - Use the SonarScanner CLI and point to lcov coverage: add `sonar.javascript.lcov.reportPaths=coverage/lcov.info` under `extraProperties`.
 
 Recommendation: Use SonarQube together with Snyk
+
 - Complementary focus areas: SonarQube covers code quality/maintainability and potential bugs; Snyk covers security (SAST), open‑source dependencies and licenses (SCA), container and IaC security.
 - Defense in depth: running both on PRs and main ensures you catch regressions in code health and security issues before merge.
 - Gating: Fail the pipeline if either the SonarQube Quality Gate fails or Snyk finds high/critical issues by policy.
@@ -1152,7 +1211,7 @@ steps:
   - task: SonarQubeAnalyze@5
   - task: SonarQubePublish@5
     inputs:
-      pollingTimeoutSec: '300'
+      pollingTimeoutSec: "300"
 
   # Snyk (token from a secure variable/Key Vault)
   - script: npm install -g snyk
@@ -1285,6 +1344,7 @@ By implementing these measures, you can ensure robust security for Marka's inter
 Regularly scan for vulnerabilities across application code, dependencies, containers, and infrastructure-as-code. Promptly address discovered issues to maintain security and stability.
 
 Recommended tool: Snyk
+
 - Scope: Snyk covers SAST (Code), SCA/dependencies & licenses (Open Source), container images (Container), and IaC (Terraform/K8s/ARM/Bicep).
 - Integration: Use the official Azure DevOps extension for first-class experience (PR checks, annotations). Alternatively, use the Snyk CLI in pipelines.
 - Gating policy: Fail builds on high/critical issues by default; teams may raise/lower thresholds for specific components with justification.

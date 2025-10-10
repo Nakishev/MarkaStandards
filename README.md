@@ -257,7 +257,11 @@ For large projects, adopt the Git Flow model. For smaller projects, a simplified
 - **feature:** optional feature branches for major changes
 - **bugfix:** optional bugfix branches
 
-Tag releases in `main` with version numbers. For small/training projects, `main` and `dev` branches may suffice.
+Tag releases in `main/master` with version numbers. For small/training projects, `main/master` and `dev` branches may suffice.
+Tag examples:
+
+- v1.0.0
+- v1.0.1
 
 Git branches naming convention:
 
@@ -268,19 +272,13 @@ Git branches naming convention:
 - Avoid using only numbers
 - Use clear, meaningful names that explain the branch's purpose
 
-Examples:
-
-- feature/add-user-authentication
-- bugfix/login-page-error
-- hotfix/security-vulnerability-123
-
 In projects with extreme level of collaboration, it is acceptable to put developer initials in the branch name.
-Typical format in this case: [category]/[initials]-[description]
+Typical format in this case: [category]/[initials]/[work_item_id]/[description]
 
 Examples:
 
-- feature/jd-user-login
-- bugfix/mp-database-connection
+- feature/jd/#123/user-login
+- bugfix/mp/#124/database-connection
 
 ### Technology Stack and Tooling Approval
 
@@ -343,28 +341,33 @@ Code reviews help us ship fast without breaking quality. Keep it simple, respect
 
 - Base against the correct branch: `dev` for staging, `main` for production releases (see Version Control and Branching).
 - Keep PRs small and focused. As a rule of thumb, prefer ≤ 400 changed lines (excluding generated files). Split big work into incremental PRs.
-- Title uses Conventional Commits style: `feat: short summary (#123)`; include the work item/issue number when applicable.
+- Title uses Conventional Commits style: `feat: short summary #123`; include the work item/issue number when applicable.
 - Description includes:
   - What changed and why (context/problem statement and approach)
   - How it was implemented (key design decisions)
   - Testing done (how to reproduce, test cases, environments)
-  - Screenshots/GIFs for UI changes
+  - Screenshots/GIFs for UI changes, test results
   - Backward compatibility, migrations, rollout/rollback plan if relevant
+  - List of required settings and environment variables (e.g., appsettings.json, Key Vault secrets), specifying what settings to be added or modified with concrete values (if possible)
+  - Required changes to the infrastructure (e.g., Azure resources, VNet/VPN, firewalls, docker images etc.)
+  - Readme, docs, contracts, API changes if relevant
 - Mark as Draft if work is in progress or awaiting dependencies.
 - PR checklist (author verifies before requesting review):
   - Formatting and linters applied; no new warnings (C#: treat warnings as errors; JS: linter clean)
   - If the PR changes business logic, include unit tests covering the implemented/modified behavior; update existing tests as needed (explain any exceptions in the description)
+  - If the PR changes transport layer/infrastructure (e.g., API contracts, database schema, docker images), include integration tests covering the implemented/modified behavior; update existing tests as needed (explain any exceptions in the description)
   - All tests pass locally; new/updated tests added where it makes sense
   - Docs updated (API/Contracts/README) if behavior or interfaces changed
   - Changelog/version updated when user-facing behavior changes
   - No secrets/credentials in code, config, or diffs; use env/Key Vault instead
   - Container image builds locally (if applicable)
+  - Observability (logging, metrics, tracing) updated if relevant
 
 #### Review Process
 
 - Approvals: at least 1 reviewer for normal changes; 2 for risky/production-impacting changes (migrations, auth, security, perf-sensitive paths).
 - Use CODEOWNERS or repository reviewer rules when available (GitHub/Azure DevOps both supported).
-- Turnaround: aim to start review within 1 business day. Authors should respond within 1 business day as well.
+- Turnaround: aim to start review within 1-2 business days. Authors should respond within 1 business day.
 - Author responsibilities:
   - Self-review before requesting review; run the full local/CI checks
   - Address every comment (code change or a reply) and resolve conversations when done
@@ -379,7 +382,7 @@ Code reviews help us ship fast without breaking quality. Keep it simple, respect
 - All required CI checks must be green (build, tests, linters; security/dependency scans when configured).
 - Prefer Squash & Merge to keep history clean. Use the PR title as the commit message (Conventional Commits), and include the PR/issue number.
 - Delete the feature branch after merge.
-- When merging to `main`, tag releases and follow the Versioning guidance.
+- When merging to `main/master`, tag releases and follow the Versioning guidance.
 - For risky changes (migrations, infra): agree on rollout and rollback, and monitor after deployment.
 
 ---
@@ -393,6 +396,12 @@ To keep project dependencies up to date, teams may adopt Renovate where it makes
 ### Framework-Specific Guidelines
 
 #### React
+
+##### Tooling
+
+- Use `pnpm` as the package manager.
+- Use `biome` as the formatter and linter.
+- Use `vite` or `next` as the build tool.
 
 ##### Component Structure and Props
 

@@ -1,0 +1,209 @@
+################################################################################
+# Universal .gitignore for: .NET (Visual Studio/Rider) + React + Node/NestJS
+# Sources & inspiration:
+# - github/gitignore: VisualStudio.gitignore, Node.gitignore, Global/macOS,
+#   Global/VisualStudioCode, Global/JetBrains
+################################################################################
+
+########################################
+# OS junk
+########################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+########################################
+# Editor / IDE
+########################################
+# Visual Studio
+.vs/
+
+# VS Code (keep team-shared workspace files only)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+# If you WANT to share workspace settings, uncomment the next line:
+# !.vscode/settings.json
+
+*.code-workspace
+.history/
+
+# JetBrains / Rider
+.idea/
+*.iml
+*.ipr
+*.iws
+
+########################################
+# .NET build output / tooling
+########################################
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+artifacts/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# MSBuild / NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+# Paket
+.paket/
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# ASP.NET scaffolding / publish outputs
+publish/
+**/wwwroot/**/dist/
+**/wwwroot/**/build/
+
+# EF / migrations temp
+*.dbmdl
+*.jfm
+
+# Certificates / signing keys (keep out of git)
+*.pfx
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
+
+########################################
+# Local secrets / config (recommended patterns)
+########################################
+# Azure Functions local settings (may contain secrets)
+local.settings.json
+**/local.settings.json
+
+# Local override conventions (prefer committing *.example / *.template files)
+.env
+.env.*
+!.env.example
+!.env.template
+
+# AppSettings local overrides (safe convention; keep your normal appsettings tracked)
+**/appsettings.*.local.json
+**/appsettings.local.json
+
+########################################
+# Node / React / NestJS
+########################################
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime / pid files
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Build output (common)
+dist/
+build/
+out/
+
+# Next.js / Nuxt / SvelteKit / Vite
+.next/
+.nuxt/
+.svelte-kit/
+.vite/
+.vitest/
+.vitest-cache/
+.eslintcache
+.stylelintcache
+
+# Parcel / CRA caches
+.cache/
+.parcel-cache/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Storybook
+storybook-static/
+
+# Playwright / Cypress artifacts
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+########################################
+# Monorepo / task runners
+########################################
+.turbo/
+.nx/
+lerna-debug.log*
+
+########################################
+# Package manager caches (sometimes end up inside repo)
+########################################
+.pnpm-store/
+**/.pnpm-store/
+**/.pnpm-cache/
+**/.npm-cache/
+.yarn/cache/
+.yarn/unplugged/
+
+########################################
+# Docker / containers (local only)
+########################################
+**/*-docker.env
+docker-compose.override.yml
+
+########################################
+# Terraform (if present)
+########################################
+.terraform/
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+.terraform.tfstate.lock.info
+
+########################################
+# “AI editor/tool” local folders (optional, but matches what you already ignore)
+########################################
+.cursor/
+.windsurf/
+.roo/
+.kilocode/
+.qoder/
+.kiro/
+.augment/
+copilot-instructions*
+
+########################################
+# Custom local logs you already use
+########################################
+ado-logs.txt

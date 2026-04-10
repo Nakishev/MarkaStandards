@@ -3,8 +3,8 @@
 **Table of Contents**
 
 - [Introduction](#introduction)
-    - [Applicability and Exceptions](#applicability-and-exceptions)
-    - [Process Maturity Levels](#process-maturity-levels)
+  - [Applicability and Exceptions](#applicability-and-exceptions)
+  - [Process Maturity Levels](#process-maturity-levels)
 - [Process Standards and Recommendations](#process-standards-and-recommendations)
   - [Human Resources (HR)](#human-resources-hr)
     - [Tools](#tools)
@@ -34,6 +34,7 @@
     - [Automated Dependency Updates](#automated-dependency-updates)
     - [Framework-Specific Guidelines](#framework-specific-guidelines)
       - [React](#react)
+        - [Tooling](#tooling)
         - [Component Structure and Props](#component-structure-and-props)
     - [Web API Development Conventions](#web-api-development-conventions)
       - [REST Compliance](#rest-compliance)
@@ -69,7 +70,7 @@
     - [Architecture and ADRs](#architecture-and-adrs)
     - [Release Changelogs](#release-changelogs)
     - [Test Reports](#test-reports)
-      - [Recommended Tools:](#recommended-tools)
+      - [Recommended Tools](#recommended-tools)
   - [Testing](#testing)
     - [Test Types](#test-types)
     - [Additional Notes](#additional-notes)
@@ -77,8 +78,8 @@
   - [Deployment](#deployment)
     - [Cloud Providers](#cloud-providers)
       - [Azure](#azure)
-      - [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
-      - [Azure Resource Governance](#azure-resource-governance)
+        - [Azure Resources Naming Conventions](#azure-resources-naming-conventions)
+        - [Azure Resource Governance](#azure-resource-governance)
     - [DevOps Practices](#devops-practices)
       - [Deployment Types](#deployment-types)
       - [CI/CD Pipelines](#cicd-pipelines)
@@ -111,11 +112,11 @@
 
 This document presents Marka’s official processes, standards, and best practices. It ensures that all teams operate with consistency, quality, and efficiency, while maintaining alignment with organizational goals. Use this guide as a reference for standard operating procedures, technical conventions, and recommended workflows across all projects and departments within Marka.
 
-### Applicability and Exceptions
+## Applicability and Exceptions
 
 While this document defines Marka’s standards, some projects (e.g., small scope, legacy constraints, tech‑stack limitations, budget restrictions, limited cloud availability, or explicit customer requirements) may treat it as guidance and best practices rather than strict policy. In such cases, apply these principles pragmatically and document any deviations and their rationale in the project’s README or architecture/ADR notes.
 
-### Process Maturity Levels
+## Process Maturity Levels
 
 Use the following levels to describe and plan the maturity of a project’s processes relative to Marka’s standards:
 
@@ -240,7 +241,7 @@ Azure DevOps Projects is the default choice for project management. Jira and Con
 ### Default Project Model and Team Activities
 
 The standard project methodology is Scrum with two-week sprints.  
-Daily stand-ups (at least twice a week), sprint planning, and sprint reviews are recommended. Sprint reviews can be conducted on demand.
+Stand-ups (daily recommended, minimum twice a week), sprint planning, and sprint reviews are recommended. Sprint reviews can be conducted on demand.
 
 ![Azure DevOps Projects Screenshot](Assets/AzureDevOps_Projects.png)
 
@@ -258,7 +259,7 @@ For large projects, adopt the Git Flow model. For smaller projects, a simplified
 - **feature:** optional feature branches for major changes
 - **bugfix:** optional bugfix branches
 
-Tag releases in `main/master` with version numbers. For small/training projects, `main/master` and `dev` branches may suffice.
+Tag releases in `main` (or `master` for legacy repos) with semantic version numbers. For small/training projects, `main/master` and `dev` branches may suffice.
 Tag examples:
 
 - v1.0.0
@@ -296,7 +297,7 @@ Maintain high-quality, consistent, and maintainable code by establishing corpora
 #### IDE/Editor Configuration
 
 Use `.editorconfig` (https://github.com/editorconfig) or other standardized configuration files for consistent formatting and styling.
-Find pre-configured `.editorconfig` files for C#, JavaScript and Python in the repository (https://github.com/Nakishev/MarkaStandards/tree/main/Configs/Editor).
+Find pre-configured `.editorconfig` files for C#, JavaScript/TypeScript, and Python in the repository under [`C#/EditorConfig/`](https://github.com/Nakishev/MarkaStandards/tree/main/C%23/EditorConfig), [`JavaScript:TypeScript/EditorConfig/`](https://github.com/Nakishev/MarkaStandards/tree/main/JavaScript%3ATypeScript/EditorConfig), and [`Python/EditorConfig/`](https://github.com/Nakishev/MarkaStandards/tree/main/Python/EditorConfig).
 
 #### Linters and Formatters
 
@@ -362,7 +363,7 @@ Code reviews help us ship fast without breaking quality. Keep it simple, respect
   - Changelog/version updated when user-facing behavior changes
   - No secrets/credentials in code, config, or diffs; use env/Key Vault instead
   - Container image builds locally (if applicable)
-  - Observability (logging, metrics, tracing) updated if relevant
+  - Observability updated if relevant: structured logging, metrics, tracing, and wide event context fields where applicable
 
 #### Review Process
 
@@ -383,7 +384,7 @@ Code reviews help us ship fast without breaking quality. Keep it simple, respect
 - All required CI checks must be green (build, tests, linters; security/dependency scans when configured).
 - Prefer Squash & Merge to keep history clean. Use the PR title as the commit message (Conventional Commits), and include the PR/issue number.
 - Delete the feature branch after merge.
-- When merging to `main/master`, tag releases and follow the Versioning guidance.
+- When merging to `main` (or `master`), tag releases and follow the Versioning guidance.
 - For risky changes (migrations, infra): agree on rollout and rollback, and monitor after deployment.
 
 ---
@@ -395,6 +396,8 @@ To keep project dependencies up to date, teams may adopt Renovate where it makes
 ---
 
 ### Framework-Specific Guidelines
+
+This section captures conventions for specific frameworks used across Marka projects. Sections for additional frameworks (e.g., .NET/ASP.NET Core, Nest.js, Next.js) will be added as conventions are established.
 
 #### React
 
@@ -548,7 +551,7 @@ Example in OpenAPI specification:
 
 Use Azure AppInsights as the primary monitoring tool for low-scale projects.
 Use standard severity levels (INFO, WARN, ERROR) for logging and alerting.
-Attribute every log message with the prefix within squared brackets containing:
+Attribute every log message with the prefix within square brackets containing:
 
 - Solution name
 - Project/Service name
@@ -557,9 +560,10 @@ Attribute every log message with the prefix within squared brackets containing:
 Example:
 
 ```
-[StockMate.TransactionService.CreateTransactions] Found 16 transactions to add. Transaction IDs: 1413, 1414, 1415, 1416, 1417, 1418, 1419, 1420, 1421, 1422, 1423, 1424, 1425, 1426, 1427, 1428
-
+[StockMate.TransactionService.CreateTransactions] Found 16 transactions to add.
 ```
+
+> **Note:** Avoid logging long lists of IDs or raw collections in log messages. Log the count only; if individual IDs are needed for debugging, emit them at DEBUG level or use the Wide Events pattern to record aggregated counts as queryable metrics.
 
 #### High-scale solutions for production
 
@@ -700,6 +704,8 @@ Implement distributed tracing using OpenTelemetry trace semantics.
    - Enable debug spans when needed
 
 #### Wide Events
+
+> Applies to all scales, but is especially valuable in high-scale and production environments where wide events replace noisy per-method logging with rich, queryable request telemetry.
 
 The wide event pattern replaces scattered per-method log lines with a single context-rich event per request, built up during request handling and emitted once at completion. This dramatically reduces log noise and enables powerful ad-hoc analytics by making business identifiers first-class queryable fields.
 
@@ -860,6 +866,7 @@ Document all Web APIs, serverless functions, and data contracts using robust too
 
 - **Preferred Tool**: **Scalar** for its enhanced documentation capabilities and advanced features.
 - **Alternative Tool**: **SwaggerUI** for basic API documentation needs.
+- For client SDK and type generation from OpenAPI specs, use **NSwag** (.NET/TS) or **Kiota** (multi-language, Azure/Microsoft aligned).
 
 **SwaggerUI Example**:
 ![Swagger Screenshot](Assets/Swagger.png)
@@ -888,7 +895,7 @@ Generated using a custom script based on commit messages.
 Share with stakeholders and customers comprehensive release test reports, that are automatically generated using tools integrated with your DevOps pipeline or based on test runs/executions according to the project test plans and created issues/bugs.
 These reports provide a detailed view of test results and coverage (if applicable and required) for every release.
 
-#### Recommended Tools:
+#### Recommended Tools
 
 - **Azure DevOps**: Use built-in test plugins to automatically generate detailed test reports from test executions.
 - **Jira**: Leverage Jira test management plugins to integrate with test runs and create comprehensive reports.
@@ -910,7 +917,7 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 
 | Test Type              | Description                                                                                       | Recommended Tools                                     | Requirement                      |
 | ---------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------- |
-| Unit Tests             | Validate individual units of code in isolation. TDD is recommended for better code quality.       | XUnit (C#), Jest/Vitest + Testing Library (JS)        | Mandatory for all projects       |
+| Unit Tests             | Validate individual units of code in isolation. TDD is recommended for better code quality.       | xUnit (C#), Jest/Vitest + Testing Library (JS)        | Mandatory for all projects       |
 | UI Tests               | Test the graphical user interface of an application.                                              | Playwright                                            | Optional                         |
 | Integration Tests      | Ensure that components or services work together as expected.                                     | Testcontainers (C#), Testcontainers + Playwright (JS) | Optional                         |
 | End-to-End Tests       | Validate complete workflows from start to finish.                                                 | Playwright                                            | Optional                         |
@@ -923,13 +930,13 @@ Adopt a comprehensive, automated testing strategy, including unit, integration, 
 - Coverage policy: Teams set project-wide coverage thresholds; a typical baseline is ≥ 80% overall, and ≥ 90% for critical modules. Enforce via CI coverage gates.
 - **Performance Testing**: Tools like [Gatling](https://gatling.io/) and k6 provide actionable insights into bottlenecks.
 - **End-to-End Testing**: Utilize Playwright for comprehensive coverage across browsers and devices.
-- Coverage tooling and publishing: .NET—collect with the built-in "XPlat Code Coverage" data collector and publish Cobertura reports in Azure DevOps (optionally generate local HTML with ReportGenerator); JS—use lcov/coverage reporters. Always publish test results and coverage summaries in Azure DevOps.
+- Coverage tooling and publishing: .NET — collect with the built-in "XPlat Code Coverage" data collector (which uses Coverlet under the hood) and publish Cobertura reports in Azure DevOps; optionally generate local HTML with ReportGenerator. JS — use lcov/coverage reporters. Always publish test results and coverage summaries in Azure DevOps.
 - Flaky tests policy: mark tests as flaky and quarantine; file an issue, track, and prioritize fixes. Avoid silently ignoring failing tests.
-- Test naming and structure: colocate tests next to code or under `tests/`; use clear names (e.g., `Given_When_Then`) and consistent suffixes (e.g., `*Tests.cs`).
+- Test naming and structure: colocate tests next to code or under `tests/`; use clear names following `MethodName_Scenario_ExpectedResult` or `Given_When_Then` conventions; use consistent suffixes (`*Tests.cs` for C#, `*.test.ts` / `*.spec.ts` for TS).
 
 ### Resources
 
-- [XUnit Documentation](https://xunit.net/)
+- [xUnit Documentation](https://xunit.net/)
 - [Playwright Testing](https://playwright.dev/)
 - [Gatling Load Testing](https://gatling.io/)
 - [Testcontainers for JavaScript](https://github.com/testcontainers/testcontainers-js)
@@ -954,7 +961,7 @@ By prioritizing Azure while remaining open to AWS and GCP, the team ensures adap
 
 #### Azure
 
-#### Azure Resources Naming Conventions
+##### Azure Resources Naming Conventions
 
 Follow these rules to keep Azure resource names consistent and compliant:
 
@@ -985,7 +992,7 @@ Examples:
 - Storage Account (no separators allowed): `sastockmateprod`
 - Container Registry (no separators allowed): `acrstockmateprod`
 
-#### Azure Resource Governance
+##### Azure Resource Governance
 
 - Use Azure Policy to enforce allowed SKUs/regions, required tags, and security baselines.
 - Require tags on all resources: `solution`, `environment`, `owner`, `costCenter` (or `project`), `managedBy`.
@@ -1015,7 +1022,7 @@ Examples:
   - Lint and format code (fail on violations; do not auto-commit fixes in CI).
   - Build artifacts and/or container images.
   - Run unit tests; collect and publish test coverage; enforce thresholds where appropriate.
-- Run security and quality scanners (SAST, SCA/dependency & license, container, IaC, secret scanning). Recommended: Snyk (Code/Open Source/Container/IaC) with severity gates (fail on high/critical by default).
+  - Run security and quality scanners (SAST, SCA/dependency & license, container, IaC, secret scanning). Recommended: Snyk (Code/Open Source/Container/IaC) with severity gates (fail on high/critical by default).
   - Publish artifacts (build outputs) and push images to ACR when applicable.
   - Deploy to required environments (dev/stage/prod) using Azure App Service or Azure Container Apps.
 - Secrets and configuration:
@@ -1027,7 +1034,6 @@ Examples:
   - Prefer YAML pipelines stored in the repo under `infrastructure/pipelines/` (recommended).
   - Place infrastructure-as-code (IaC) definitions under `infrastructure/` (e.g., `infrastructure/iac/`) for Terraform, Pulumi, Bicep, or ARM templates.
   - Keep pipelines simple; split when it improves clarity and speed.
-  - reusable templates if such do exist, store in `infrastructure/pipelines/templates/`.
   - Centralize common logic in reusable templates under `infrastructure/pipelines/templates/`.
   - Configuration: use variable groups and consistent service connection names (e.g., `vg-<project>-<env>`, `sc-<target>`).
 - Separate/auxiliary pipelines:
@@ -1045,7 +1051,7 @@ Examples:
 
 Example (Azure DevOps YAML using Snyk CLI):
 
-```yaml path=null start=null
+```yaml
 # Assumes SNYK_TOKEN is stored securely in a variable group or Key Vault secret
 # and mapped into the pipeline as $(SNYK_TOKEN). Do not echo this value.
 steps:
@@ -1090,7 +1096,7 @@ Notes:
 
 Collect and publish code coverage in CI. For .NET, use the built-in "XPlat Code Coverage" data collector and publish Cobertura format so Azure DevOps can render coverage summaries.
 
-```yaml path=null start=null
+```yaml
 # .NET tests with coverage collection and publishing in Azure DevOps
 # Key points:
 # - Collect coverage via the built-in "XPlat Code Coverage" data collector
@@ -1160,8 +1166,8 @@ Limitations (Community Edition):
 
 Setup locally (recommended via Docker Compose):
 
-```yaml path=null start=null
-version: "3.9"
+```yaml
+# The top-level "version" field is obsolete in Compose Specification v2+; omit it.
 services:
   db:
     image: postgres:15-alpine
@@ -1195,7 +1201,7 @@ After startup, open http://localhost:9000 (default admin/admin), change the pass
 
 Azure DevOps Pipelines integration (using the official SonarQube tasks):
 
-```yaml path=null start=null
+```yaml
 # Requires the "SonarQube" Azure DevOps extension and a service connection
 # named SonarQubeService. No secrets are echoed in logs.
 steps:
@@ -1235,7 +1241,7 @@ steps:
 
 Alternative: CLI (no service connection) with dotnet-sonarscanner
 
-```yaml path=null start=null
+```yaml
 steps:
   - script: dotnet tool install -g dotnet-sonarscanner
     displayName: Install SonarScanner for .NET
@@ -1282,7 +1288,7 @@ Recommendation: Use SonarQube together with Snyk
 
 Minimal combined gating example:
 
-```yaml path=null start=null
+```yaml
 steps:
   # ... SonarQubePrepare + build/test/coverage as above ...
   - task: SonarQubeAnalyze@5
@@ -1309,7 +1315,12 @@ steps:
 
 #### Infrastructure as Code (IaC)
 
-Use Pulumi, Terraform or Azure Resource Manager (ARM) templates to provision and manage infrastructure resources as code for long-term projects.
+Use Pulumi, Terraform, Azure Bicep, or Azure Resource Manager (ARM) templates to provision and manage infrastructure resources as code for long-term projects. Prefer Bicep over raw ARM for Azure-native deployments due to improved readability and tooling support.
+
+- Store IaC definitions under `infrastructure/iac/` in the repository.
+- Keep IaC changes in dedicated branches and run plan/apply via CI pipelines with manual approvals (see [CI/CD Pipelines](#cicd-pipelines)).
+- Version-control all IaC; never apply manual infrastructure changes without reflecting them in code.
+- Use remote state with locking (Terraform: Azure Blob Storage backend; Pulumi: Pulumi Cloud or self-hosted).
 
 ---
 
@@ -1334,7 +1345,7 @@ Ensure the following objects and entities are included in the backup plan:
 
 - **Regular Backups**: Back up all critical cloud resources such as databases, storage accounts, and repositories. Follow the project-specific backup policy, including frequency and retention periods.
 - **Restoration Testing**: Periodically test the restoration process to verify the integrity and usability of backups. Include restoration drills in the DevOps cycle to simulate disaster recovery scenarios.
-- **Infrastructure as Code (IaC)**: Use IaC tools such as Pulumi, Terraform, or ARM templates for fast and reliable provisioning of infrastructure. Ensure the IaC scripts are version-controlled and up-to-date.
+- **Infrastructure as Code (IaC)**: Use IaC tools such as Pulumi, Terraform, Azure Bicep, or ARM templates for fast and reliable provisioning of infrastructure. Ensure the IaC scripts are version-controlled and up-to-date.
 - **3-2-1 Backup Rule**:
   - Maintain **3 copies** of your data (1 primary and 2 backups).
   - Store backups on **2 different types** of media (e.g., cloud and local storage).
@@ -1383,7 +1394,7 @@ Ensure secure and controlled external access to Marka's internal resources by fo
   - Avoid exposing databases directly to the internet.
 - **Firewall Configuration**:
   - Configure firewalls to restrict database access.
-  - Whitelist only specific external IP addresses of trusted users or systems that require database access.
+  - Allowlist only specific external IP addresses of trusted users or systems that require database access.
   - Regularly review and update firewall rules to remove obsolete or unnecessary entries.
 
 #### Web Application Protection
@@ -1399,7 +1410,7 @@ Ensure secure and controlled external access to Marka's internal resources by fo
 
 - **Secure Authentication**:
   - Enforce strong, multi-factor authentication (MFA) for accessing sensitive resources.
-  - Integrate with identity providers such as Azure Active Directory for centralized user management.
+  - Integrate with identity providers such as Microsoft Entra ID (formerly Azure Active Directory) for centralized user management.
 - **Granular Authorization**:
   - Follow the principle of least privilege (PoLP) by granting users only the minimum permissions needed for their roles.
   - Use role-based access control (RBAC) to manage and audit user permissions effectively.
@@ -1474,6 +1485,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Secure Database Access](#secure-database-access)
 - Azure Virtual Network (VNet) — Private networking in Azure.
   See: [Secure Database Access](#secure-database-access)
+- Azure Bicep — Domain-specific language for deploying Azure resources; preferred over raw ARM for Azure-native IaC.
+  See: [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
 - Bacula — On‑prem backup tool.
   See: [Recommended Tools](#recommended-tools-1)
 - Biome — JavaScript linter and formatter.
@@ -1490,8 +1503,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Project Management Tools and Resources](#project-management-tools-and-resources)
 - Conventional Commits — Commit message standard.
   See: [Commit Message Standards](#commit-message-standards)
-- Coverlet — .NET code coverage tool.
-  See: [Additional Notes](#additional-notes)
+- Coverlet — .NET code coverage library (used internally by the "XPlat Code Coverage" data collector in `dotnet test`). No direct invocation needed; coverage is collected via `--collect "XPlat Code Coverage"`.
+  See: [Additional Notes](#additional-notes), [CI/CD Pipelines](#cicd-pipelines)
 - Dive — Docker image analysis tool.
   See: [Image Optimizations](#image-optimizations)
 - Docker — Containerization tooling.
@@ -1500,8 +1513,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
 - EditorConfig — Cross‑editor configuration standard.
   See: [IDE/Editor Configuration](#ideeditor-configuration)
-- Entra ID (Azure AD) — Identity platform for internal accounts.
-  See: [Onboarding](#onboarding)
+- Entra ID (formerly Azure AD) — Microsoft's cloud identity platform for internal accounts and SSO.
+  See: [Onboarding](#onboarding), [Authentication and Authorization](#authentication-and-authorization)
 - Gatling — Load testing tool.
   See: [Test Types](#test-types)
 - Gitleaks — Secret scanning tool.
@@ -1516,8 +1529,12 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Commit Message Validation](#commit-message-validation)
 - Jest — JavaScript testing framework.
   See: [Test Types](#test-types)
+- Kestra — Open-source workflow orchestration platform for scheduled tasks, data pipelines, and maintenance jobs.
+  See: [Orchestration and Scheduled Tasks](#orchestration-and-scheduled-tasks), [Backup Policy](#backup-policy)
 - Jira — Project management platform (secondary).
   See: [Project Management Tools and Resources](#project-management-tools-and-resources)
+- Kiota — Microsoft's OpenAPI-based SDK generator (multi-language); recommended for generating typed API clients.
+  See: [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
 - k6 — Load testing tool.
   See: [Test Types](#test-types)
 - Keycloak — Self‑hosted identity and access management for production‑grade auth.
@@ -1534,6 +1551,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Test Types](#test-types)
 - Mattermost — Self‑hosted team chat.
   See: [Communication and Process Workflows](#communication-and-process-workflows)
+- NSwag — .NET/TypeScript client and stub generator from OpenAPI/Swagger specs.
+  See: [Web API, Serverless, and Data Contracts](#web-api-serverless-and-data-contracts)
 - Microsoft Teams — Team chat alternative (SaaS).
   See: [Communication and Process Workflows](#communication-and-process-workflows)
 - OpenTelemetry (OTel) — Observability standard for logs/metrics/traces; OTLP exporters.
@@ -1576,6 +1595,8 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Test Types](#test-types)
 - XPlat Code Coverage — .NET cross‑platform coverage data collector used in pipelines.
   See: [CI/CD Pipelines](#cicd-pipelines)
+- Wide Events — Observability pattern that accumulates per-request context and emits it as enriched RequestTelemetry in Application Insights.
+  See: [Wide Events](#wide-events), [Wide Events Reference](docs/references/wide-events-reference.md)
 - AWS Backup — Managed backup in AWS.
   See: [Recommended Tools](#recommended-tools-1)
 - Azure Backup — Managed backup in Azure.
@@ -1585,7 +1606,7 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
 - Azure Web Application Firewall (WAF) — Web app protection.
   See: [Web Application Protection](#web-application-protection)
 
-# Official Resources
+## Official Resources
 
 - [Official Public Site](https://marka-development.com/)
 - [Staff Management System](https://wa-staffmanagement-linux-prod.azurewebsites.net)

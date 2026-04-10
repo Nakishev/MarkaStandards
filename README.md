@@ -57,6 +57,7 @@
         - [Distributed Tracing](#distributed-tracing)
           - [Trace Requirements](#trace-requirements)
           - [Sampling Strategy](#sampling-strategy)
+      - [Wide Events](#wide-events)
       - [Alerting and Uptime Monitoring](#alerting-and-uptime-monitoring)
     - [Containerization](#containerization)
       - [Dockerfile and Docker Compose Requirements](#dockerfile-and-docker-compose-requirements)
@@ -697,6 +698,73 @@ Implement distributed tracing using OpenTelemetry trace semantics.
 2. Non-Production Environments
    - Sample 100% of all spans
    - Enable debug spans when needed
+
+#### Wide Events
+
+The wide event pattern replaces scattered per-method log lines with a single context-rich event per request, built up during request handling and emitted once at completion. This dramatically reduces log noise and enables powerful ad-hoc analytics by making business identifiers first-class queryable fields.
+
+**Core principle:** the existing Application Insights `RequestTelemetry` for each incoming request becomes the canonical wide event, enriched with curated custom dimensions and metrics via an `ITelemetryInitializer`.
+
+##### Implementation Components
+
+Every Marka .NET Web API project adopting wide events must implement the following components:
+
+| Component | Layer | Description |
+|---|---|---|
+| `WideEventKeys` | Application/Abstractions | Static class with `const string` keys, all prefixed `we.*`. The only allowed source of key names. |
+| `IWideEventContext` | Application/Abstractions | Vendor-agnostic interface: `Add(key, value)` overloads + `AddMetric(name, value)`. |
+| `IWideEventContextAccessor` | Application/Abstractions | Ambient accessor (`IWideEventContext? Context { get; }`). |
+| `WideEventContext` | Infrastructure | Thread-safe implementation using `ConcurrentDictionary`. |
+| `WideEventContextAccessor` | Infrastructure | `AsyncLocal<T>` implementation so context flows across `await` boundaries. |
+| `WideEventMiddleware` | Infrastructure | Seeds request fields, captures duration, sets outcome. Stores context in both `AsyncLocal` and `HttpContext.Items`. |
+| `WideEventTelemetryInitializer` | Infrastructure | `ITelemetryInitializer` that copies context to `RequestTelemetry.Properties/.Metrics` and a minimal subset to `ExceptionTelemetry` and `DependencyTelemetry`. |
+
+##### Key Schema Rules
+
+- All keys **must** be defined as constants in `WideEventKeys` — never use ad-hoc strings.
+- All keys must be prefixed with `we.` to namespace them in Application Insights.
+- Values must be small and queryable: IDs, codes, counts, booleans. Never raw payloads, PII, or tokens.
+- Required keys for every request: `we.schema_version`, `we.request.method`, `we.request.path`, `we.request.route`, `we.outcome`.
+
+See [Wide Events Reference](docs/references/wide-events-reference.md) for the full schema and query examples, and [Wide Events Adoption](docs/design-docs/wide-events-adoption.md) for the design rationale and phased migration plan.
+
+##### Usage in Application Services
+
+```csharp
+public class MyService : IMyService
+{
+    private readonly IWideEventContextAccessor _wideEventContextAccessor;
+
+    public MyService(IWideEventContextAccessor wideEventContextAccessor)
+    {
+        _wideEventContextAccessor = wideEventContextAccessor;
+    }
+
+    public async Task<List<ItemDto>> GetItemsAsync(int accountId)
+    {
+        var ctx = _wideEventContextAccessor.Context;
+        ctx?.Add(WideEventKeys.AccountId, accountId);
+        ctx?.Add(WideEventKeys.CacheKeyPrefix, "items");
+
+        var items = await _repository.GetItemsAsync(accountId);
+
+        ctx?.Add(WideEventKeys.CacheHit, false);
+        ctx?.AddMetric(WideEventKeys.MetricItemsCount, items.Count);
+
+        return items;
+    }
+}
+```
+
+##### When to Use Traditional Logging vs Wide Events
+
+| Scenario | Preferred approach |
+|---|---|
+| Request-level business context (IDs, flags, counts) | Wide event context (`IWideEventContext.Add`) |
+| Per-request outcome and metrics | Wide event context (`AddMetric`, `we.outcome`) |
+| Unexpected exceptions | `ILogger.LogError` / `LogWarning` |
+| Data quality issues in external responses | `ILogger.LogWarning` |
+| Temporary debug breadcrumbs | `ILogger` (feature-flagged, remove after use) |
 
 #### Alerting and Uptime Monitoring
 

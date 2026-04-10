@@ -1,0 +1,16 @@
+#!/bin/sh
+# Marka — Husky pre-commit hook
+# Runs lint-staged to lint and format only staged files before committing.
+#
+# Setup:
+#   pnpm add -D husky lint-staged
+#   pnpm exec husky init
+#   cp this file to your project's .husky/pre-commit
+#   chmod +x .husky/pre-commit
+#
+# Configure lint-staged in package.json:
+#   "lint-staged": {
+#     "*.{ts,tsx,js,jsx}": ["biome check --write"],
+#     "*.{json,css,md}":   ["biome format --write"]
+#   }
+pnpm exec lint-staged

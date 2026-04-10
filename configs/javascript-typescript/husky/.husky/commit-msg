@@ -1,0 +1,10 @@
+#!/bin/sh
+# Marka — Husky commit-msg hook
+# Runs commitlint to enforce Conventional Commits on every commit.
+#
+# Setup:
+#   pnpm add -D husky @commitlint/cli @commitlint/config-conventional
+#   pnpm exec husky init
+#   cp this file to your project's .husky/commit-msg
+#   chmod +x .husky/commit-msg
+pnpm exec commitlint --edit "$1"

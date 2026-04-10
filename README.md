@@ -3,6 +3,7 @@
 **Table of Contents**
 
 - [Introduction](#introduction)
+  - [Repository Structure](#repository-structure)
   - [Applicability and Exceptions](#applicability-and-exceptions)
   - [Process Maturity Levels](#process-maturity-levels)
 - [Process Standards and Recommendations](#process-standards-and-recommendations)
@@ -111,6 +112,30 @@
 # Introduction
 
 This document presents Marka’s official processes, standards, and best practices. It ensures that all teams operate with consistency, quality, and efficiency, while maintaining alignment with organizational goals. Use this guide as a reference for standard operating procedures, technical conventions, and recommended workflows across all projects and departments within Marka.
+
+## Repository Structure
+
+```
+MarkaStandards/
+├── README.md                       This document — the complete Marka standards handbook
+│
+├── configs/                        Ready-to-use config file templates (copy into your project)
+│   ├── csharp/                     .editorconfig, .gitignore, .dockerignore for C# / .NET
+│   ├── javascript-typescript/      .editorconfig, .gitignore, .dockerignore, biome.json,
+│   │                               commitlint.config.js, Husky hooks
+│   ├── python/                     .editorconfig, .gitignore, .dockerignore for Python
+│   ├── terraform/                  .editorconfig, .gitignore for Terraform / Bicep / Pulumi
+│   └── universal/                  Universal multi-language .gitignore (monorepos)
+│
+├── docs/                           Design documents and reference material
+│   ├── design-docs/                Design proposals and ADRs
+│   └── references/                 Field references (schemas, patterns, query examples)
+│
+└── assets/                         Screenshots and diagrams referenced in this README
+```
+
+See [`configs/README.md`](configs/README.md) for quick-start copy commands per language.
+
 
 ## Applicability and Exceptions
 
@@ -297,14 +322,14 @@ Maintain high-quality, consistent, and maintainable code by establishing corpora
 #### IDE/Editor Configuration
 
 Use `.editorconfig` (https://github.com/editorconfig) or other standardized configuration files for consistent formatting and styling.
-Find pre-configured `.editorconfig` files for C#, JavaScript/TypeScript, and Python in the repository under [`C#/EditorConfig/`](https://github.com/Nakishev/MarkaStandards/tree/main/C%23/EditorConfig), [`JavaScript:TypeScript/EditorConfig/`](https://github.com/Nakishev/MarkaStandards/tree/main/JavaScript%3ATypeScript/EditorConfig), and [`Python/EditorConfig/`](https://github.com/Nakishev/MarkaStandards/tree/main/Python/EditorConfig).
+Find pre-configured `.editorconfig` files for C#, JavaScript/TypeScript, and Python in the repository under [`configs/csharp/`](https://github.com/Nakishev/MarkaStandards/tree/main/configs/csharp), [`configs/javascript-typescript/`](https://github.com/Nakishev/MarkaStandards/tree/main/configs/javascript-typescript), and [`configs/python/`](https://github.com/Nakishev/MarkaStandards/tree/main/configs/python).
 
 #### Linters and Formatters
 
 Employ linters and formatters to enforce code style rules automatically.
 
 - C#: Use `CSharpier` as the formatter; use Roslyn/StyleCop analyzers for linting and enable 'treat warnings as errors'.
-- JavaScript: Use `Biome` as both linter and formatter.
+- JavaScript/TypeScript: Use `Biome` as both linter and formatter. See [`configs/javascript-typescript/biome.json`](configs/javascript-typescript/biome.json) for the Marka base config.
 
 #### Commit Message Validation
 

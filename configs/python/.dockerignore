@@ -1,0 +1,95 @@
+# ──────────────────────────────────────────────────────────────
+# Marka .dockerignore — Python
+# Covers: FastAPI, Django, Flask, plain scripts
+# ──────────────────────────────────────────────────────────────
+
+# Source control
+.git
+.gitignore
+.gitattributes
+
+# Editor / IDE metadata
+.vscode/
+.idea/
+*.code-workspace
+.history/
+
+# OS junk
+.DS_Store
+Thumbbs.db
+
+# Python byte-code and caches — never needed in image
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments — install deps via pip/uv in Dockerfile instead
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+__pypackages__/
+
+# Package / distribution artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+MANIFEST
+*.whl
+*.tar.gz
+sdist/
+wheels/
+develop-eggs/
+
+# Test artifacts
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.hypothesis/
+coverage.xml
+*.cover
+nosetests.xml
+
+# Type checking / linting caches
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Logs
+*.log
+logs/
+pip-log.txt
+
+# CI / DevOps metadata (not needed in image)
+.github/
+.azuredevops/
+infrastructure/
+Dockerfile*
+docker-compose*.yml
+*.md
+
+# Misc
+*.sqlite3
+*.db
+site/
+docs/_build/

@@ -1,0 +1,153 @@
+# ──────────────────────────────────────────────────────────────
+# Marka .gitignore — C# / .NET
+# Covers: ASP.NET Core, Azure Functions, console apps, libraries
+# ──────────────────────────────────────────────────────────────
+
+########################################
+# OS junk
+########################################
+.DS_Store
+**/.DS_Store
+Thumbbs.db
+Desktop.ini
+
+########################################
+# Editor / IDE
+########################################
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+*.code-workspace
+.history/
+
+# JetBrains / Rider
+.idea/
+*.sln.iml
+.idea.*.sln.iml
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+########################################
+# .NET build output
+########################################
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+bld/
+publish/
+
+# MSBuild / NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+.paket/
+paket-files/
+
+# EF Core migrations snapshots (keep source, ignore generated)
+*.dbmdl
+*.jfm
+
+# User-specific project files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+########################################
+# Test results and coverage
+########################################
+[Tt]est[Rr]esult*/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+BenchmarkDotNet.Artifacts/
+
+########################################
+# ASP.NET Core / publish output
+########################################
+**/wwwroot/**/dist/
+**/wwwroot/**/build/
+
+########################################
+# Azure Functions
+########################################
+# Local settings file may contain connection strings / secrets
+local.settings.json
+**/local.settings.json
+
+########################################
+# Local secrets / config overrides
+########################################
+.env
+.env.*
+!.env.example
+!.env.template
+
+# AppSettings local overrides (keep normal appsettings.json tracked)
+**/appsettings.*.local.json
+**/appsettings.local.json
+
+# Certificates / signing keys
+*.pfx
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
+*.snk
+
+########################################
+# Docker / containers
+########################################
+**/*-docker.env
+docker-compose.override.yml
+
+########################################
+# Terraform (if present in monorepo)
+########################################
+.terraform/
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+.terraform.tfstate.lock.info
+
+########################################
+# Node.js (if present in monorepo — e.g., React frontend)
+########################################
+node_modules/
+**/node_modules/
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+########################################
+# AI editor local folders
+########################################
+.cursor/
+.windsurf/
+.roo/
+.kilocode/
+.augment/
+copilot-instructions*

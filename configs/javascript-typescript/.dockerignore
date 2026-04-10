@@ -1,0 +1,72 @@
+# ──────────────────────────────────────────────────────────────
+# Marka .dockerignore — Node.js / JavaScript / TypeScript
+# Covers: Next.js, Nest.js, Vite, plain Node apps
+# ──────────────────────────────────────────────────────────────
+
+# Source control
+.git
+.gitignore
+.gitattributes
+
+# Editor / IDE metadata
+.vscode/
+.idea/
+*.code-workspace
+.history/
+
+# OS junk
+.DS_Store
+Thumbbs.db
+
+# Dependencies — never copy into image; install inside Dockerfile
+node_modules/
+**/node_modules/
+
+# Package manager caches
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.pnpm-store/
+
+# Build outputs (if you build outside the image and COPY dist/ explicitly,
+# comment these out for those specific paths)
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+
+# Test artifacts
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# CI / DevOps metadata (not needed in image)
+.github/
+.azuredevops/
+infrastructure/
+Dockerfile*
+docker-compose*.yml
+*.md
+
+# Misc local tools
+.turbo/
+.nx/

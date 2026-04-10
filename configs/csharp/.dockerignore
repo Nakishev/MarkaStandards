@@ -1,0 +1,92 @@
+# ──────────────────────────────────────────────────────────────
+# Marka .dockerignore — C# / .NET
+# Covers: ASP.NET Core, Azure Functions, console apps
+#
+# Strategy: exclude everything that Docker doesn't need to build
+# the image. The Dockerfile COPY steps should be explicit anyway.
+# ──────────────────────────────────────────────────────────────
+
+# Source control
+.git
+.gitignore
+.gitattributes
+
+# Editor / IDE metadata
+.vs/
+.vscode/
+.idea/
+*.code-workspace
+.history/
+**/*.user
+**/*.suo
+
+# OS junk
+**/.DS_Store
+**/Thumbbs.db
+
+# Build outputs — will be produced inside the image
+**/bin/
+**/obj/
+**/artifacts/
+**/publish/
+**/bld/
+**/[Ll]ogs/
+
+# Test projects and results — not needed for production image
+**/*Tests*/
+**/*Test*/
+**/*.Tests/
+**/*.Test/
+**/TestResults/
+**/*.trx
+**/*.coverage
+**/*.coveragexml
+
+# NuGet packages (restored inside Docker)
+**/packages/
+**/*.nupkg
+**/*.snupkg
+
+# Node.js / frontend (if separate build stage, adjust as needed)
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+
+# Local secrets and config overrides
+**/*.env
+**/.env
+**/local.settings.json
+**/appsettings.*.local.json
+**/appsettings.local.json
+
+# Certificates / keys
+**/*.pfx
+**/*.p12
+**/*.pem
+**/*.key
+**/*.cer
+**/*.crt
+**/*.snk
+
+# Docker files themselves (not needed inside image)
+Dockerfile*
+docker-compose*.yml
+**/.dockerignore
+
+# IaC / CI/CD (not part of the application)
+infrastructure/
+.github/
+.azuredevops/
+
+# Documentation and assets
+**/*.md
+**/*.txt
+LICENSE
+Assets/
+docs/
+
+# Misc scripts
+**/*.ps1
+**/*.cmd
+**/*.sh

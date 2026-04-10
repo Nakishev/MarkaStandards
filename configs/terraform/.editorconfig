@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────
+# Marka .editorconfig — Terraform / OpenTofu / Bicep / Pulumi
+# ──────────────────────────────────────────────────────────────
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Terraform HCL files
+[*.{tf,tfvars}]
+indent_style = space
+indent_size = 2
+
+# Bicep files
+[*.bicep]
+indent_style = space
+indent_size = 2
+
+# ARM / Pulumi / general JSON
+[*.json]
+indent_style = space
+indent_size = 2
+
+# YAML (Pulumi stacks, Ansible playbooks, pipeline definitions)
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Markdown documentation
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = 120
+
+# Shell scripts (init scripts, helper wrappers)
+[*.sh]
+indent_style = space
+indent_size = 2
+end_of_line = lf

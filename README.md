@@ -163,11 +163,11 @@ Use the following levels to describe and plan the maturity of a project’s proc
   - Comprehensive observability (OTel logs/metrics/traces, Azure AppInsights, Azure Log Workspaces); code coverage thresholds (≥80% overall, ≥90% for critical modules) with reports published in Azure DevOps; IaC for infra; scheduled workflows (e.g., Azure Functions, Kestra); uptime monitoring (Azure Monitor, Uptime Kuma); and governance (Azure Policy, budgets, tags).
   - Formal architecture/ADRs; per‑service README with run/test/deploy instructions.
 - Level 4 — Secure & Intelligent (Elite Standard)
-  - Security-by-default gates: mandatory Snyk scans (Code/SAST, Open Source/SCA+licenses, Container, IaC) on PRs and main; fail on high/critical by default; nightly/weekly scheduled scans and ACR/registry scanning; documented remediation SLAs (critical ≤7 days, high ≤30 days).
+  - Security-by-default gates: mandatory approved security scans on PRs and main (Snyk is the recommended default for Code/SAST, Open Source/SCA+licenses, Container, and IaC); fail on high/critical by default; nightly/weekly scheduled scans and registry scanning; documented remediation SLAs (critical ≤7 days, high ≤30 days).
   - Deep code quality analysis: SonarQube CE integrated into pipelines; Cobertura coverage imported; enforce Quality Gate on new code (coverage ≥80% on new code, duplication ≤3%, Maintainability and Reliability ratings A); block merges on gate failure.
   - Secrets protection: all secrets in Key Vault; mandatory secret scanning (e.g., Gitleaks) in CI and at repo host; pipelines fail on detected secrets.
   - Coverage as a gate: branch and line coverage thresholds enforced per component; critical modules target ≥90% line and meaningful branch coverage; publish risk hotspots and coverage dashboards in Azure DevOps.
-  - Supply chain hardening: pin/lock dependencies; signed container images where applicable; container base images kept current; Snyk Container gating active on images built in CI.
+  - Supply chain hardening: pin/lock dependencies; signed container images where applicable; container base images kept current; container scanning gates active on images built in CI.
   - Governance & compliance: policy‑as‑code (Azure Policy), environment approvals and audit trails, release tagging and changelogs; periodic security/quality reviews with action items tracked.
 
 Define the current and target maturity level at project kick‑off and revisit each quarter or major release.
@@ -418,14 +418,14 @@ Find pre-configured `.editorconfig` files for C#, JavaScript/TypeScript, and Pyt
 
 Employ linters and formatters to enforce code style rules automatically.
 
-- C#: Use `CSharpier` as the formatter; use Roslyn/StyleCop analyzers for linting and enable 'treat warnings as errors'.
+- C#: Use `.editorconfig` as the formatting source of truth and Roslyn/StyleCop analyzers for linting. Enable `TreatWarningsAsErrors` in CI for projects that have completed analyzer baselining. Do **not** use CSharpier as the Marka standard; it is retired for Marka projects because it does not respect the full `.editorconfig` rule set.
 - JavaScript/TypeScript: Use `Biome` as both linter and formatter. See [`configs/javascript-typescript/biome.json`](configs/javascript-typescript/biome.json) for the Marka base config.
 
 #### Commit Message Validation
 
 - All projects must follow Conventional Commits for clarity and automated changelogs.
 - JavaScript projects: Use Husky + lint-staged and `commitlint` to enforce rules locally.
-- C# projects: Use `CSharpier` as the formatter; use analyzers (Roslyn/StyleCop) for linting; enforce commit message rules via CI (pipeline checks) or server-side hooks.
+- C# projects: Use `.editorconfig` + analyzers (Roslyn/StyleCop) for style/lint checks; enforce commit message rules via CI (pipeline checks) or server-side hooks.
 - Alternative to pre-commit hooks: Teams that prefer faster pushes can run style/lint and commit message checks in CI instead of local hooks. In that case, block merges if checks fail.
 
 #### Commit Message Standards
@@ -552,6 +552,8 @@ Organize the inside of your React components in the following order to improve r
 
 ### Web API Development Conventions
 
+These conventions are strongest for public, customer-facing, partner-facing, and long-lived APIs. Internal service-to-service APIs should follow them for new work where practical, but may document compatibility or migration exceptions when strict REST maturity would create unnecessary churn.
+
 #### REST Compliance
 
 Adhere to REST principles (Level 0–2 of Richardson Maturity Model). Level 3 (Hypermedia) is optional.
@@ -640,17 +642,20 @@ Example in OpenAPI specification:
 
 #### Idempotency
 
-- For operations that clients may retry (e.g., create), support `Idempotency-Key` header to prevent duplicate effects.
+- For public/customer-facing operations that clients may retry (e.g., create), support the `Idempotency-Key` header to prevent duplicate effects.
+- For internal APIs, use `Idempotency-Key` where duplicate effects are plausible and retries cross process or network boundaries; otherwise document the operation's retry behavior.
 
 #### Versioning and Deprecation
 
 - Use semantic versioning for APIs. Prefer versioning in the path (e.g., `/v1`) for public APIs; headers are acceptable for internal services.
-- Announce deprecations with `Deprecation` and `Sunset` headers and documentation; provide migration guidance and timelines.
+- Announce public API deprecations with `Deprecation` and `Sunset` headers and documentation; provide migration guidance and timelines.
+- For internal APIs, deprecation headers are optional when all consumers are controlled by the same team; still document migration and compatibility expectations.
 
 #### Caching and Rate Limiting
 
-- For GET endpoints, support `ETag`/`If-None-Match` and appropriate `Cache-Control`; return 304 when unchanged.
-- Document rate limits. On throttle, return 429 with `Retry-After`.
+- For cacheable public GET endpoints, support `ETag`/`If-None-Match` and appropriate `Cache-Control`; return 304 when unchanged.
+- For internal APIs, prefer simple server-side caching and documented cache invalidation semantics unless conditional HTTP caching adds clear value.
+- Document rate limits for public or shared APIs. On throttle, return 429 with `Retry-After`.
 
 #### Data Formats
 
@@ -820,7 +825,7 @@ Implement distributed tracing using OpenTelemetry trace semantics.
 
 #### Wide Events
 
-> Applies to all scales, but is especially valuable in high-scale and production environments where wide events replace noisy per-method logging with rich, queryable request telemetry.
+> Applies to all scales as a useful pattern, but is especially valuable in high-scale and production environments where wide events replace noisy per-method logging with rich, queryable request telemetry. For internal or low-scale projects, adopt this pattern incrementally when operational debugging needs justify the added plumbing.
 
 The wide event pattern replaces scattered per-method log lines with a single context-rich event per request, built up during request handling and emitted once at completion. This dramatically reduces log noise and enables powerful ad-hoc analytics by making business identifiers first-class queryable fields.
 
@@ -828,7 +833,7 @@ The wide event pattern replaces scattered per-method log lines with a single con
 
 ##### Implementation Components
 
-Every Marka .NET Web API project adopting wide events must implement the following components:
+Marka .NET Web API projects that adopt the full wide-events pattern should implement the following components. Teams may phase these in endpoint-by-endpoint; see the adoption document for rollout sequencing.
 
 | Component | Layer | Description |
 |---|---|---|
@@ -933,8 +938,8 @@ All developed projects and infrastructure components must be containerized (if i
 - **Use Multi-Stage Builds**  
   Optimize the build process by separating build and runtime stages to reduce the final image size.
 
-- **Prefer Alpine-Based Images**  
-  Utilize lightweight Alpine-based images wherever possible to ensure smaller and more secure containers.
+- **Prefer minimal hardened base images**  
+  Use the smallest maintained base image that is appropriate for the runtime and operational requirements. Alpine is often a good choice for Node.js and Python images; for .NET, prefer Microsoft chiseled/distroless-style runtime images where possible instead of forcing Alpine and its musl/ICU trade-offs.
 
 - **Minimize Image Size and Layer Count**
 
@@ -1146,10 +1151,10 @@ Examples:
 - Environments and approvals:
   - Use Azure DevOps Environments (dev, stage, prod) with checks and approvals; require manual approval for prod.
 - Structure and naming:
-  - Prefer YAML pipelines stored in the repo under `infrastructure/pipelines/` (recommended).
-  - Place infrastructure-as-code (IaC) definitions under `infrastructure/` (e.g., `infrastructure/iac/`) for Terraform, Pulumi, Bicep, or ARM templates.
+  - Prefer YAML pipelines stored in the repo under an infrastructure pipelines folder such as `infrastructure/pipelines/` or `Infrastructure/Pipelines/` (recommended). Existing repositories may keep established casing/layout when it is already documented and consistently used.
+  - Place infrastructure-as-code (IaC) definitions under an infrastructure folder such as `infrastructure/`, `Infrastructure/`, or `infrastructure/iac/` for Terraform, Pulumi, Bicep, or ARM templates.
   - Keep pipelines simple; split when it improves clarity and speed.
-  - Centralize common logic in reusable templates under `infrastructure/pipelines/templates/`.
+  - Centralize common logic in reusable templates under the chosen pipelines folder, for example `infrastructure/pipelines/templates/`.
   - Configuration: use variable groups and consistent service connection names (e.g., `vg-<project>-<env>`, `sc-<target>`).
 - Separate/auxiliary pipelines:
   - Test suites: UI, integration, end-to-end, performance/load (on demand, nightly, or on tags/branches). May use ephemeral envs or Testcontainers.
@@ -1432,7 +1437,7 @@ steps:
 
 Use Pulumi, Terraform, Azure Bicep, or Azure Resource Manager (ARM) templates to provision and manage infrastructure resources as code for long-term projects. Prefer Bicep over raw ARM for Azure-native deployments due to improved readability and tooling support.
 
-- Store IaC definitions under `infrastructure/iac/` in the repository.
+- Store IaC definitions under a clear infrastructure folder in the repository (for example `infrastructure/iac/`, `Infrastructure/Terraform/`, or `Infrastructure/Bicep/`). Prefer consistency within a repository over renaming mature layouts for casing alone.
 - Keep IaC changes in dedicated branches and run plan/apply via CI pipelines with manual approvals (see [CI/CD Pipelines](#cicd-pipelines)).
 - Version-control all IaC; never apply manual infrastructure changes without reflecting them in code.
 - Use remote state with locking (Terraform: Azure Blob Storage backend; Pulumi: Pulumi Cloud or self-hosted).
@@ -1612,8 +1617,6 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Linters and Formatters](#linters-and-formatters)
 - C4 Model — Architecture diagramming approach (Context/Container/Component).
   See: [Architecture and ADRs](#architecture-and-adrs)
-- CSharpier — C# code formatter.
-  See: [Linters and Formatters](#linters-and-formatters)
 - Cobertura — Code coverage report format we publish from pipelines.
   See: [CI/CD Pipelines](#cicd-pipelines)
 - commitlint — Conventional Commits enforcement for commit messages.

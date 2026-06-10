@@ -8,11 +8,14 @@
 
 ## .editorconfig highlights
 
-- 4-space indentation, CRLF line endings (configurable per team)
+- 4-space indentation and LF line endings by default (teams may override line endings when a legacy repository requires it)
+- `.editorconfig` is the C# formatting source of truth for Marka projects
 - Enforces PascalCase for types and non-field members; `I` prefix for interfaces
 - All `dotnet_style_*` and `csharp_style_*` conventions pre-configured
 - StyleCop diagnostic suppressions for rules commonly disabled in Marka projects (SA1101, SA1200, SA1309, etc.)
-- Treat C# analyzer warnings as suggestions by default; escalate to errors in CI via `<TreatWarningsAsErrors>`
+- Treat C# analyzer warnings as suggestions by default; escalate to errors in CI via `<TreatWarningsAsErrors>` after analyzer baselining
+
+> CSharpier is retired for Marka C# projects because it does not respect the full `.editorconfig` rule set. Use `.editorconfig` + Roslyn/StyleCop analyzers instead.
 
 ## .dockerignore notes
 

@@ -17,7 +17,7 @@ configs/
 │   ├── .dockerignore           node_modules, test artifacts, env files
 │   ├── biome.json              Biome linter + formatter config (replaces ESLint + Prettier)
 │   ├── commitlint.config.js    Conventional Commits enforcement via commitlint
-│   └── husky/
+│   └── husky/                  Optional local hooks for teams that want pre-commit feedback
 │       └── .husky/
 │           ├── commit-msg      Runs commitlint on each commit
 │           └── pre-commit      Runs lint-staged before each commit
@@ -58,8 +58,11 @@ cp configs/javascript-typescript/.dockerignore        ./
 cp configs/javascript-typescript/biome.json           ./
 cp configs/javascript-typescript/commitlint.config.js ./
 
-# Install and set up Husky
-pnpm add -D husky lint-staged @commitlint/cli @commitlint/config-conventional
+# Install commitlint for CI/PR validation
+pnpm add -D @commitlint/cli @commitlint/config-conventional
+
+# Optional: install local Husky hooks for faster pre-commit feedback
+pnpm add -D husky lint-staged
 pnpm exec husky init
 cp configs/javascript-typescript/husky/.husky/commit-msg  .husky/commit-msg
 cp configs/javascript-typescript/husky/.husky/pre-commit  .husky/pre-commit

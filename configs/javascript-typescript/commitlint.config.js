@@ -5,7 +5,8 @@
 // Install:
 //   pnpm add -D @commitlint/cli @commitlint/config-conventional
 //
-// Wire up with Husky (see .husky/commit-msg in this repo):
+// Preferred enforcement: run in CI/PR validation.
+// Optional local hook (see .husky/commit-msg in this repo):
 //   pnpm add -D husky
 //   pnpm exec husky init
 //   echo "pnpm exec commitlint --edit \$1" > .husky/commit-msg
@@ -47,13 +48,13 @@ export default {
     // ── Subject ─────────────────────────────────────────────
     'subject-empty': [2, 'never'],
     'subject-full-stop': [2, 'never', '.'],   // No trailing period
-    'subject-case': [2, 'always', 'sentence-case'],  // "Add login page" not "add login page"
+    'subject-case': [0, 'always'],            // Do not block PR/squash titles on wording case
     'subject-max-length': [2, 'always', 100],
 
     // ── Body / Footer ───────────────────────────────────────
     'body-leading-blank': [1, 'always'],   // Blank line between subject and body
     'footer-leading-blank': [1, 'always'],
-    'body-max-line-length': [2, 'always', 120],
+    'body-max-line-length': [0, 'always'], // Do not block detailed PR/squash bodies on wrapping
     'footer-max-line-length': [2, 'always', 120],
   },
 };

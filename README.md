@@ -128,7 +128,7 @@ MarkaStandards/
 ├── configs/                        Ready-to-use config file templates (copy into your project)
 │   ├── csharp/                     .editorconfig, .gitignore, .dockerignore for C# / .NET
 │   ├── javascript-typescript/      .editorconfig, .gitignore, .dockerignore, biome.json,
-│   │                               commitlint.config.js, Husky hooks
+│   │                               commitlint.config.js, optional Husky hooks
 │   ├── python/                     .editorconfig, .gitignore, .dockerignore for Python
 │   ├── terraform/                  .editorconfig, .gitignore for Terraform / Bicep / Pulumi
 │   └── universal/                  Universal multi-language .gitignore (monorepos)
@@ -418,15 +418,17 @@ Find pre-configured `.editorconfig` files for C#, JavaScript/TypeScript, and Pyt
 
 Employ linters and formatters to enforce code style rules automatically.
 
-- C#: Use `.editorconfig` as the formatting source of truth and Roslyn/StyleCop analyzers for linting. Enable `TreatWarningsAsErrors` in CI for projects that have completed analyzer baselining. Do **not** use CSharpier as the Marka standard; it is retired for Marka projects because it does not respect the full `.editorconfig` rule set.
+- C#: Use `.editorconfig` as the formatting source of truth and Roslyn/StyleCop analyzers for linting. Enable `TreatWarningsAsErrors` in CI for projects that have completed analyzer baselining. Use `dotnet format style --verify-no-changes` as the CI style gate where practical. If a legacy codebase has noisy import ordering, ignore only the `IMPORTS` diagnostic in the pipeline wrapper; do not remove the whole style/analyzer gate. Do **not** use CSharpier as the Marka standard; it is retired for Marka projects because it does not respect the full `.editorconfig` rule set.
 - JavaScript/TypeScript: Use `Biome` as both linter and formatter. See [`configs/javascript-typescript/biome.json`](configs/javascript-typescript/biome.json) for the Marka base config.
 
 #### Commit Message Validation
 
 - All projects must follow Conventional Commits for clarity and automated changelogs.
-- JavaScript projects: Use Husky + lint-staged and `commitlint` to enforce rules locally.
+- Preferred enforcement point: CI/PR validation with `commitlint`. Local hooks are optional; do not require Husky in projects where CI gates already block invalid messages.
+- JavaScript/TypeScript projects: Use `@commitlint/cli` + `@commitlint/config-conventional`; use the Marka config in [`configs/javascript-typescript/commitlint.config.js`](configs/javascript-typescript/commitlint.config.js). The base config enforces type/scope/subject basics but intentionally does not fail on subject capitalization or long PR/squash body lines.
 - C# projects: Use `.editorconfig` + analyzers (Roslyn/StyleCop) for style/lint checks; enforce commit message rules via CI (pipeline checks) or server-side hooks.
-- Alternative to pre-commit hooks: Teams that prefer faster pushes can run style/lint and commit message checks in CI instead of local hooks. In that case, block merges if checks fail.
+- For Azure DevOps PR validation, use `checkout: self` with `fetchDepth: 0` before any `commitlint --from=HEAD~1 --to=HEAD` fallback. Prefer `UseNode@1` for Node setup; `NodeTool@0` is deprecated.
+- If PR title validation is mandatory, read the title from the provider API when the PR-title environment variable is unavailable; otherwise fall back to validating the latest commit range after a full checkout.
 
 #### Commit Message Standards
 
@@ -1168,6 +1170,63 @@ Examples:
 - Performance:
   - Enable caching for package managers (NuGet/npm/pnpm) and Docker layers.
   - Run jobs and stages in parallel when possible.
+- PR validation implementation notes:
+  - Use full Git checkout (`fetchDepth: 0` in Azure DevOps) when a check reads commit history, compares revisions, or validates `HEAD~1..HEAD`.
+  - Use current pipeline tasks: for Azure DevOps Node setup, prefer `UseNode@1`; do not add new pipelines with deprecated `NodeTool@0`.
+  - Keep style gates targeted. If import-ordering is a legacy baseline issue, suppress or filter only import-order diagnostics; keep other formatter/analyzer checks active.
+
+Recommended Conventional Commit check for JavaScript/TypeScript PR pipelines:
+
+```yaml
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: UseNode@1
+    inputs:
+      version: '22.x'
+
+  - script: |
+      corepack enable
+      corepack prepare pnpm@latest --activate
+      pnpm install --frozen-lockfile
+    displayName: Install dependencies
+
+  - script: |
+      if [ -n "$SYSTEM_PULLREQUEST_PULLREQUESTTITLE" ]; then
+        echo "$SYSTEM_PULLREQUEST_PULLREQUESTTITLE" | pnpm exec commitlint
+      else
+        pnpm exec commitlint --from=HEAD~1 --to=HEAD
+      fi
+    displayName: Validate Conventional Commit title/message
+```
+
+Recommended C# style gate when import ordering is not yet baselined:
+
+```yaml
+- script: |
+    set +e
+    output=$(dotnet format style MySolution.sln --severity warn --verify-no-changes --no-restore 2>&1)
+    status=$?
+    set -e
+
+    echo "$output"
+
+    if [ "$status" -eq 0 ]; then
+      exit 0
+    fi
+
+    import_errors=$(printf '%s\n' "$output" | grep -E 'error IMPORTS:' || true)
+    non_import_errors=$(printf '%s\n' "$output" | grep -E 'error [A-Z0-9]+:' | grep -v 'error IMPORTS:' || true)
+
+    if [ -n "$import_errors" ] && [ -z "$non_import_errors" ]; then
+      echo "Only import-ordering diagnostics were reported; ignoring IMPORTS for the PR style baseline."
+      exit 0
+    fi
+
+    exit "$status"
+  displayName: Validate C# style/analyzers (ignore import ordering)
+```
 
 Example (Azure DevOps YAML using Snyk CLI):
 
@@ -1647,7 +1706,7 @@ Alphabetical index of tools, libraries, and services mentioned in this handbook,
   See: [Version Control and Branching](#version-control-and-branching), [CI/CD Pipelines](#cicd-pipelines)
 - Google Cloud Backup and DR — GCP backup solution.
   See: [Recommended Tools](#recommended-tools-1)
-- Husky — Git hooks manager (JS projects).
+- Husky — Optional Git hooks manager for JavaScript/TypeScript projects that want local pre-commit feedback in addition to CI gates.
   See: [Commit Message Validation](#commit-message-validation)
 - Jest — JavaScript testing framework.
   See: [Test Types](#test-types)

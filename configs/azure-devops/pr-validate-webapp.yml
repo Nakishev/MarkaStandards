@@ -1,0 +1,68 @@
+# Marka PR validation pipeline — pr-validate-webapp
+# Source of truth: docs/standards/delivery.md#cicd-pipelines. Lifted from StaffManagement Infrastructure/Pipelines/marka-tech/pr/.
+# Copy into infrastructure/pipelines/pr/, adjust paths/solution name, register as a build-validation policy on dev/main.
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      - dev
+      - develop
+
+pr:
+  branches:
+    include:
+      - '*'
+  paths:
+    include:
+      - webapp/**
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  directory: webapp
+
+steps:
+  - template: steps-gitleaks.yml
+
+  - task: UseNode@1
+    inputs:
+      version: '23.0.0'
+    displayName: 'Install Node.js'
+
+  - task: Cache@2
+    displayName: 'Cache pnpm store'
+    inputs:
+      key: 'pnpm | "$(Agent.OS)" | webapp/pnpm-lock.yaml'
+      restoreKeys: |
+        pnpm | "$(Agent.OS)"
+      path: '$(Build.SourcesDirectory)/webapp/.pnpm-store'
+
+  - script: |
+      npm install -g corepack@0.31.0
+      corepack enable
+      corepack prepare pnpm@10.9.0 --activate
+      pnpm --version
+    displayName: 'Enable pnpm'
+
+  - script: pnpm install --frozen-lockfile
+    displayName: 'Install dependencies'
+    workingDirectory: $(directory)
+
+  - script: pnpm run lint
+    displayName: 'Lint webapp'
+    workingDirectory: $(directory)
+
+  - script: pnpm run typecheck
+    displayName: 'Typecheck webapp'
+    workingDirectory: $(directory)
+
+  - script: pnpm run test
+    displayName: 'Unit tests'
+    workingDirectory: $(directory)
+
+  - script: pnpm run build
+    displayName: 'Build webapp'
+    workingDirectory: $(directory)

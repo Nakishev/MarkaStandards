@@ -1,0 +1,35 @@
+<Project>
+  <!--
+    Marka repository-wide build settings. Place at the repository root next to the .sln.
+    Individual .csproj files then contain only what is specific to them.
+  -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' or '$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Analyzers -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Flip to true once the analyzer baseline is clean (track the baselining in docs/exec-plans/). -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <!-- Lock files for reproducible restores (requires Directory.Packages.props / central package management). -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true' or '$(TF_BUILD)' == 'true'">true</RestoreLockedMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Test projects: relax rules that add no value in tests. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CA1707;SA1600</NoWarn>
+  </PropertyGroup>
+</Project>

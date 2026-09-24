@@ -9,7 +9,8 @@
 # Local .terraform directories (provider plugins, modules)
 **/.terraform/*
 .terraform/
-.terraform.lock.hcl    # Commit this in application repos; ignore in modules
+# Commit .terraform.lock.hcl in application repos; uncomment to ignore it in reusable modules
+# .terraform.lock.hcl
 
 # State files — never commit; use remote state (Azure Blob, Terraform Cloud)
 *.tfstate
@@ -36,9 +37,12 @@ override.tf.json
 !*.tfvars.example
 !*.tfvars.template
 
-# Plan files — generated artifacts, not source
+# Plan files — generated artifacts that embed resolved secret values
+# (`terraform plan -out=tfplan` has no extension)
 *.tfplan
 *.plan
+tfplan
+tfplan.*
 
 # Backend config files (may contain sensitive endpoints/tokens)
 backend.config
@@ -55,7 +59,8 @@ terraform.rc
 
 # Local stack state and secrets passphrase
 .pulumi/
-Pulumi.*.yaml    # Stack files may contain secrets; use Pulumi secrets backend
+# Stack files may contain secrets; use the Pulumi secrets backend
+Pulumi.*.yaml
 # Exception: keep the base Pulumi.yaml project file
 !Pulumi.yaml
 
@@ -102,7 +107,27 @@ Thumbbs.db
 .idea/
 *.code-workspace
 
+# Certificates / private keys (for example tls_private_key output written to disk)
+*.pfx
+*.p12
+*.pem
+*.key
+
 # Environment / secrets
 .env
 .env.*
 !.env.example
+!.env.template
+
+# mise developer-local settings and secrets
+mise.local.toml
+mise.*.local.toml
+
+# Archives often wrap .env files, dumps, or exports. Allow a real asset
+# explicitly, for example: !assets/icons.zip
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz

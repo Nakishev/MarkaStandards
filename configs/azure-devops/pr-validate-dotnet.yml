@@ -1,0 +1,142 @@
+# Marka PR validation pipeline — pr-validate-dotnet
+# Source of truth: docs/standards/delivery.md#cicd-pipelines. Lifted from StaffManagement Infrastructure/Pipelines/marka-tech/pr/.
+# Copy into infrastructure/pipelines/pr/, adjust paths/solution name, register as a build-validation policy on dev/main.
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      - dev
+      - develop
+
+pr:
+  branches:
+    include:
+      - '*'
+  paths:
+    include:
+      - src/**
+      - tests/**
+      - MySolution.sln
+      - global.json
+      - Directory.Build.props
+      - Directory.Packages.props
+      - '**/packages.lock.json'
+      - dotnet-tools.json
+      - CodeCoverage.runsettings
+      - .editorconfig
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Debug
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: UseDotNet@2
+    displayName: 'Use .NET SDK 10.0.x'
+    inputs:
+      packageType: 'sdk'
+      version: '10.0.x'
+
+  - task: Cache@2
+    displayName: 'Cache NuGet packages'
+    inputs:
+      key: 'nuget | "$(Agent.OS)" | global.json | Directory.Packages.props | MySolution.sln'
+      restoreKeys: |
+        nuget | "$(Agent.OS)"
+      path: '$(HOME)/.nuget/packages'
+
+  - script: dotnet tool restore
+    displayName: 'Restore dotnet tools'
+
+  - script: dotnet restore MySolution.sln
+    displayName: 'Restore packages'
+
+
+  - script: dotnet build MySolution.sln -c $(buildConfiguration) --no-restore
+    displayName: 'Build'
+
+  - script: |
+      dotnet test MySolution.sln \
+        -c $(buildConfiguration) \
+        --no-build \
+        --filter "Category!=Integration" \
+        --logger "trx;LogFilePrefix=unit" \
+        --results-directory "$(Agent.TempDirectory)/test-results/unit" \
+        --collect:"XPlat Code Coverage" \
+        --settings "$(Build.SourcesDirectory)/CodeCoverage.runsettings"
+    displayName: 'Run unit tests with coverage'
+
+  - script: |
+      dotnet test MySolution.sln \
+        -c $(buildConfiguration) \
+        --no-build \
+        --filter "Category=Integration" \
+        --logger "trx;LogFilePrefix=integration" \
+        --results-directory "$(Agent.TempDirectory)/test-results/integration" \
+        --collect:"XPlat Code Coverage" \
+        --settings "$(Build.SourcesDirectory)/CodeCoverage.runsettings"
+    displayName: 'Run integration tests with coverage'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    condition: always()
+    inputs:
+      testResultsFormat: 'VSTest'
+      testResultsFiles: '$(Agent.TempDirectory)/test-results/**/*.trx'
+      failTaskOnFailedTests: true
+
+  - task: PublishCodeCoverageResults@2
+    displayName: Publish coverage (Cobertura)
+    condition: always()
+    inputs:
+      summaryFileLocation: '$(Agent.TempDirectory)/test-results/**/coverage.cobertura.xml'
+      failIfCoverageEmpty: true
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish coverage artifacts'
+    condition: always()
+    inputs:
+      targetPath: '$(Agent.TempDirectory)/test-results'
+      artifact: 'backend-test-results-and-coverage'
+      publishLocation: 'pipeline'
+
+  - script: |
+      set +e
+      output=$(dotnet format MySolution.sln --verify-no-changes --severity warn --no-restore 2>&1)
+      status=$?
+      set -e
+
+      echo "$output"
+
+      if [ "$status" -eq 0 ]; then
+        exit 0
+      fi
+
+      import_errors=$(printf '%s\n' "$output" | grep -E 'error IMPORTS:' || true)
+      non_import_errors=$(printf '%s\n' "$output" | grep -E 'error [A-Z0-9]+:' | grep -v 'error IMPORTS:' || true)
+
+      if [ -n "$import_errors" ] && [ -z "$non_import_errors" ]; then
+        echo "Only import-ordering diagnostics were reported; ignoring IMPORTS for the PR style baseline."
+        exit 0
+      fi
+
+      exit "$status"
+    displayName: 'Validate C# style/analyzers (ignore import ordering)'
+
+
+  - script: dotnet list MySolution.sln package --vulnerable --include-transitive
+    displayName: 'Scan NuGet packages for vulnerabilities (informational)'
+    continueOnError: true
+
+
+  - template: steps-gitleaks.yml
+
+  # Level 4 only: add SonarQube/Snyk gates here. Community Build cannot analyze PRs
+  # (no sonar.pullrequest.* support) — run SonarQube on the deploy pipelines instead
+  # and record the decision in docs/adr/ (see docs/standards/delivery.md).

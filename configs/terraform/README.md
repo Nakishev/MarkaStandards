@@ -16,7 +16,7 @@
 | `*.tfvars` / `*.tfvars.json` | ❌ No | May contain secrets; use `*.tfvars.example` templates instead |
 | `*.tfstate` / `*.tfstate.*` | ❌ Never | Use remote state (Azure Blob, Terraform Cloud) |
 | `.terraform/` directory | ❌ No | Provider plugins; restored by `terraform init` |
-| `*.tfplan` | ❌ No | Generated artifacts; store in CI only if needed |
+| `*.tfplan` / `tfplan` / `tfplan.*` | ❌ Never | Saved plans embed resolved secret values (keys, passwords); keep them in the CI run only |
 | `Pulumi.*.yaml` | ❌ No | Stack files may contain encrypted secrets |
 | `Pulumi.yaml` | ✅ Yes | Project definition file |
 | `*.parameters.json` | ❌ No | ARM/Bicep parameter files may contain secrets; use `.parameters.example.json` |
@@ -53,6 +53,6 @@ terraform init -backend-config=backend.config
 
 ## Related standards
 
-- [Infrastructure as Code (IaC)](../../README.md#infrastructure-as-code-iac)
-- [CI/CD Pipelines](../../README.md#cicd-pipelines)
-- [Secrets Management](../../README.md#secrets-management)
+- [Infrastructure as Code (IaC)](../../docs/standards/delivery.md#infrastructure-as-code-iac)
+- [CI/CD Pipelines](../../docs/standards/delivery.md#cicd-pipelines)
+- [Secrets Management](../../docs/standards/security.md#secrets-management)

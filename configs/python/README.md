@@ -3,7 +3,7 @@
 | File | Purpose |
 |---|---|
 | `.editorconfig` | 4-space indentation, LF line endings, PEP 8 line length (88 = Black default), file-type overrides |
-| `.gitignore` | `__pycache__`, virtual environments, dist artifacts, test results, type-checker caches |
+| `.gitignore` | `__pycache__`, virtual environments, dist artifacts, test results, type-checker caches, env files, key and service-account files, archives, Terraform state/plans |
 | `.dockerignore` | Virtual environments, byte-code, test artifacts, secrets — for Python Docker images |
 
 ## .editorconfig notes
@@ -17,11 +17,13 @@
 | Tool | Purpose | Install |
 |---|---|---|
 | [Ruff](https://docs.astral.sh/ruff/) | Fast linter + formatter (replaces Flake8 + isort + Black) | `pip install ruff` |
-| [mypy](https://mypy-lang.org/) | Static type checking | `pip install mypy` |
+| [ty](https://docs.astral.sh/ty/) | Static type checking | `pip install ty` |
 | [pytest](https://pytest.org/) | Test runner | `pip install pytest` |
 | [pre-commit](https://pre-commit.com/) | Git hooks for lint/format | `pip install pre-commit` |
 
-### Ruff configuration (add to `pyproject.toml`)
+The supplied `pyproject.toml` contains the Ruff configuration below and sets `ty` as the default type checker. Merge it into an existing project file rather than adding a second Ruff or mypy configuration.
+
+### Ruff configuration
 
 ```toml
 [tool.ruff]
@@ -47,13 +49,9 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
-    hooks:
-      - id: mypy
 ```
 
 ## Related standards
 
-- [Linters and Formatters](../../README.md#linters-and-formatters)
-- [Containerization](../../README.md#containerization)
+- [Linters and Formatters](../../docs/standards/workflow.md#linters-and-formatters)
+- [Containerization](../../docs/standards/delivery.md#containerization)

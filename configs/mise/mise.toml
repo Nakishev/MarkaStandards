@@ -1,0 +1,82 @@
+# Marka mise starter — https://mise.jdx.dev/
+# Copy to the repository root. Keep the canonical task names below (docs/standards/workflow.md#task-runner-mise)
+# and add project-specific tasks alongside. Secrets go to mise.local.toml (gitignored), never here.
+
+[tools]
+# Pin what the project uses; delete the rest.
+dotnet = "10"
+node = "22"
+pnpm = "10"
+# python = "3.12"
+# uv = "latest"
+# terraform = "1.13"
+
+[env]
+ASPNETCORE_ENVIRONMENT = "Development"
+DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+
+# ── Canonical tasks ─────────────────────────────────────────────────────────
+
+[tasks.dev]
+description = "Run the application locally with dependencies"
+run = "docker compose up -d && dotnet run --project src/MyService.Web.Host"
+
+[tasks.build]
+description = "Build all deliverables"
+run = "dotnet build MySolution.sln -c Release"
+
+[tasks.lint]
+description = "Lint + format check (no writes)"
+run = "dotnet format MySolution.sln --verify-no-changes --severity warn"
+
+[tasks.lint-fix]
+description = "Lint + format with writes"
+run = "dotnet format MySolution.sln"
+
+[tasks.typecheck]
+description = "Static type check (frontend)"
+dir = "webapp"
+run = "pnpm run typecheck"
+
+[tasks.test]
+description = "Unit tests"
+run = 'dotnet test MySolution.sln --filter "Category!=Integration" --collect:"XPlat Code Coverage"'
+
+[tasks.test-integration]
+description = "Integration tests (Docker required)"
+run = 'dotnet test MySolution.sln --filter "Category=Integration"'
+
+[tasks.verify]
+description = "Everything CI runs: build, lint, typecheck, tests"
+depends = ["build", "lint", "typecheck", "test"]
+
+[tasks.docker-build]
+run = "docker build -t myservice:local ."
+
+[tasks.docker-up]
+run = "docker compose up -d"
+
+[tasks.docker-down]
+run = "docker compose down"
+
+[tasks.migration-add-dev]
+description = "Add an EF Core migration: mise run migration-add-dev -- <Name>"
+run = "dotnet ef migrations add {{arg(name='name')}} --project src/MyService.Infrastructure.Persistence --startup-project src/MyService.Web.Host"
+
+[tasks.migration-apply-dev]
+run = "dotnet ef database update --project src/MyService.Infrastructure.Persistence --startup-project src/MyService.Web.Host"
+
+[tasks.migration-script-prod]
+description = "Generate an idempotent SQL script for review before a production apply"
+run = "dotnet ef migrations script --idempotent --output .tmp/migrate-prod.sql --project src/MyService.Infrastructure.Persistence --startup-project src/MyService.Web.Host"
+
+# Small projects only; team projects deploy from Azure DevOps.
+[tasks.deploy-dev]
+description = "Build, push to ACR, update the Container App (dev)"
+run = """
+set -euo pipefail
+tag="$(git describe --tags --always)-$(git rev-parse --short HEAD)"
+docker build -t marka.azurecr.io/myservice:$tag .
+docker push marka.azurecr.io/myservice:$tag
+az containerapp update -n ca-myservice-dev -g rg-myservice-dev --image marka.azurecr.io/myservice:$tag
+"""

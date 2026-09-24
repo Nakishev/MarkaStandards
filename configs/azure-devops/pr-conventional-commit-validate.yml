@@ -1,0 +1,124 @@
+# Marka PR validation pipeline — pr-conventional-commit-validate
+# Source of truth: docs/standards/delivery.md#cicd-pipelines. Lifted from StaffManagement Infrastructure/Pipelines/marka-tech/pr/.
+# Copy into infrastructure/pipelines/pr/, adjust paths/solution name, register as a build-validation policy on dev/main.
+
+trigger: none
+
+pr:
+  branches:
+    include:
+      - '*'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: UseNode@1
+    inputs:
+      version: '23.0.0'
+    displayName: 'Install Node.js'
+
+  - script: |
+      set -euo pipefail
+
+      commitlint_dir="$(Agent.TempDirectory)/commitlint"
+      mkdir -p "$commitlint_dir"
+      cd "$commitlint_dir"
+
+      npm init -y >/dev/null
+      npm install --no-audit --no-fund @commitlint/cli@21.0.2 @commitlint/config-conventional@21.0.2
+
+      cat > commitlint.config.cjs <<'EOF'
+      module.exports = {
+        extends: ['@commitlint/config-conventional'],
+        rules: {
+          'body-max-line-length': [0, 'always'],
+          'header-max-length': [0, 'always'],
+          'subject-case': [0, 'always'],
+        },
+      }
+      EOF
+
+      pr_title_file="$(Agent.TempDirectory)/pr-title.txt"
+      : > "$pr_title_file"
+
+      pull_request_id="${SYSTEM_PULLREQUEST_PULLREQUESTID:-}"
+      if [ -z "$pull_request_id" ] && [[ "${BUILD_SOURCEBRANCH:-}" =~ ^refs/pull/([0-9]+)/ ]]; then
+        pull_request_id="${BASH_REMATCH[1]}"
+      fi
+
+      if [ -n "${SYSTEM_PULLREQUEST_PULLREQUESTTITLE:-}" ]; then
+        printf '%s\n' "$SYSTEM_PULLREQUEST_PULLREQUESTTITLE" > "$pr_title_file"
+      elif [ -n "$pull_request_id" ] && [ -n "${SYSTEM_ACCESSTOKEN:-}" ]; then
+        PULL_REQUEST_ID="$pull_request_id" node --input-type=module <<'NODE' > "$pr_title_file"
+      const env = process.env;
+      const collectionUri = env.SYSTEM_COLLECTIONURI ?? env.SYSTEM_TEAMFOUNDATIONCOLLECTIONURI;
+      const project = env.SYSTEM_TEAMPROJECT;
+      const repositoryId = env.BUILD_REPOSITORY_ID;
+      const pullRequestId = env.PULL_REQUEST_ID;
+      const token = env.SYSTEM_ACCESSTOKEN;
+
+      if (!collectionUri || !project || !repositoryId || !pullRequestId || !token) {
+        process.exit(0);
+      }
+
+      const encodedProject = encodeURIComponent(project);
+      const url = `${collectionUri}${encodedProject}/_apis/git/repositories/${repositoryId}/pullRequests/${pullRequestId}?api-version=7.1`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        console.error(`Failed to fetch PR title: ${response.status} ${response.statusText}`);
+        console.error(body);
+        process.exit(1);
+      }
+
+      const pullRequest = await response.json();
+      console.log(pullRequest.title ?? '');
+      NODE
+      fi
+
+      validate_work_item_reference() {
+        local input_file="$1"
+
+        if ! grep -Eq '#[0-9]+' "$input_file"; then
+          echo "A reference to an Azure Boards work item is required."
+          echo "Include a work item reference in the PR title or commit message, for example: #12345"
+          exit 1
+        fi
+      }
+
+      if [ -s "$pr_title_file" ]; then
+        echo "Validating PR title with commitlint and work item reference check:"
+        cat "$pr_title_file"
+        validate_work_item_reference "$pr_title_file"
+        node_modules/.bin/commitlint --config commitlint.config.cjs < "$pr_title_file"
+      else
+        echo "PR title was not available; validating source commit message instead."
+        commit_message_file="$(Agent.TempDirectory)/latest-commit-message.txt"
+        cd "$(Build.SourcesDirectory)"
+
+        if git rev-parse --verify HEAD^2 >/dev/null 2>&1; then
+          # Azure Repos build-validation checks out a synthetic merge commit. The second parent is
+          # the PR source branch tip; validate that instead of the generated merge message.
+          git log -1 --pretty=%B HEAD^2 > "$commit_message_file"
+        else
+          git log --no-merges -1 --pretty=%B > "$commit_message_file"
+        fi
+
+        echo "Validating source commit message with commitlint and work item reference check:"
+        cat "$commit_message_file"
+        validate_work_item_reference "$commit_message_file"
+        "$commitlint_dir/node_modules/.bin/commitlint" --config "$commitlint_dir/commitlint.config.cjs" < "$commit_message_file"
+      fi
+    displayName: 'Validate Conventional Commit title/message and work item reference'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)

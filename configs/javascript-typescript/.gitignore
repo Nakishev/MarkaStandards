@@ -85,6 +85,8 @@ test-results/
 cypress/videos/
 cypress/screenshots/
 blob-report/
+# Playwright storage state (session cookies and tokens)
+.auth/
 
 ########################################
 # Logs
@@ -113,6 +115,30 @@ pids/
 !.env.example
 !.env.template
 
+# Certificates / private keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# mise developer-local settings and secrets
+mise.local.toml
+mise.*.local.toml
+
+# Cloud service-account keys downloaded from a console (Firebase / GCP)
+*firebase-adminsdk*.json
+service-account*.json
+serviceAccountKey*.json
+
+# Archives often wrap .env files, dumps, or exports. Allow a real asset
+# explicitly, for example: !assets/icons.zip
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
 ########################################
 # Linter / formatter caches
 ########################################
@@ -133,6 +159,15 @@ pids/
 *.tfstate
 *.tfstate.*
 crash.log
+# Saved plans embed resolved secret values; `terraform plan -out=tfplan` has no extension
+*.tfplan
+tfplan
+tfplan.*
+# Variable files may contain secrets; keep example / template var files
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.template
 
 ########################################
 # AI editor local folders

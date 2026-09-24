@@ -129,6 +129,9 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+!.env.example
+!.env.template
 .venv
 env/
 venv/
@@ -169,3 +172,40 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Terraform (if present)
+.terraform/
+*.tfstate
+*.tfstate.*
+# Saved plans embed resolved secret values; `terraform plan -out=tfplan` has no extension
+*.tfplan
+tfplan
+tfplan.*
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.template
+
+# Certificates / private keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# mise developer-local settings and secrets
+mise.local.toml
+mise.*.local.toml
+
+# Cloud service-account keys downloaded from a console (Firebase / GCP)
+*firebase-adminsdk*.json
+service-account*.json
+serviceAccountKey*.json
+
+# Archives often wrap .env files, dumps, or exports. Allow a real asset
+# explicitly, for example: !assets/icons.zip
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz

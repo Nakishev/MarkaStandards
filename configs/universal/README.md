@@ -2,7 +2,7 @@
 
 | File | Purpose |
 |---|---|
-| `.gitignore` | Multi-language universal gitignore covering C# + .NET, Node.js + React + NestJS, Terraform, and common AI editor local folders |
+| `.gitignore` | Multi-language universal gitignore covering C# + .NET, Node.js + React + NestJS, Terraform (state, saved plans, tfvars), secret-bearing files (env, keys, service accounts, `mise.local.toml`, archives, Playwright auth state), and common AI editor local folders |
 
 ## When to use the universal gitignore
 
@@ -24,4 +24,4 @@ cp configs/universal/.gitignore .gitignore
 
 ## Related standards
 
-- [Version Control and Branching](../../README.md#version-control-and-branching)
+- [Version Control and Branching](../../docs/standards/workflow.md#version-control-and-branching)

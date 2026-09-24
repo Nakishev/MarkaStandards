@@ -3,7 +3,7 @@
 | File | Purpose |
 |---|---|
 | `.editorconfig` | Indent style, quote type, line endings for TS/JS/JSON/YAML/CSS |
-| `.gitignore` | node_modules, build outputs, env files, package manager caches, test artifacts |
+| `.gitignore` | node_modules, build outputs, env files, package manager caches, test artifacts, Playwright auth state (`.auth/`), key and service-account files, archives, Terraform state/plans |
 | `.dockerignore` | node_modules, build outputs, test artifacts, env files — for Node.js Docker images |
 | `biome.json` | Biome linter + formatter (replaces ESLint + Prettier) |
 | `commitlint.config.js` | Conventional Commits enforcement via `@commitlint/config-conventional` |
@@ -103,7 +103,8 @@ Add to `package.json` when using the optional pre-commit hook:
 
 ## Related standards
 
-- [Linters and Formatters](../../README.md#linters-and-formatters)
-- [Commit Message Standards](../../README.md#commit-message-standards)
-- [Commit Message Validation](../../README.md#commit-message-validation)
-- [Containerization](../../README.md#containerization)
+- [Web Frontend conventions](../../docs/standards/web-frontend.md)
+- [Linters and Formatters](../../docs/standards/workflow.md#linters-and-formatters)
+- [Commit Message Standards](../../docs/standards/workflow.md#commit-message-standards)
+- [Commit Message Validation](../../docs/standards/workflow.md#commit-message-validation)
+- [Containerization](../../docs/standards/delivery.md#containerization)

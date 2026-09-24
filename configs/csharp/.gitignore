@@ -116,6 +116,24 @@ local.settings.json
 *.crt
 *.snk
 
+# mise developer-local settings and secrets
+mise.local.toml
+mise.*.local.toml
+
+# Cloud service-account keys downloaded from a console (Firebase / GCP)
+*firebase-adminsdk*.json
+service-account*.json
+serviceAccountKey*.json
+
+# Archives often wrap .env files, dumps, or exports. Allow a real asset
+# explicitly, for example: !assets/icons.zip
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
 ########################################
 # Docker / containers
 ########################################
@@ -131,6 +149,15 @@ docker-compose.override.yml
 *.tfstate.*
 crash.log
 .terraform.tfstate.lock.info
+# Saved plans embed resolved secret values; `terraform plan -out=tfplan` has no extension
+*.tfplan
+tfplan
+tfplan.*
+# Variable files may contain secrets; keep example / template var files
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.template
 
 ########################################
 # Node.js (if present in monorepo — e.g., React frontend)
@@ -141,6 +168,11 @@ dist/
 build/
 .next/
 *.tsbuildinfo
+playwright-report/
+blob-report/
+test-results/
+# Playwright storage state (session cookies and tokens)
+.auth/
 
 ########################################
 # AI editor local folders
